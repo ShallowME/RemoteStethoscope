@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">RemoteStethoscope</string>
+    <string name="app_name">Remote Stethoscope</string>
     <string name="on_pause_button">On_Pause_Button</string>
     <string name="list_save_button">List_Save_Button</string>
     <string name="cancel_record_button">Cancel_Record_Button</string>

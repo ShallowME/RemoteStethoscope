@@ -1,22 +1,30 @@
 package com.shallow.remotestethoscope;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AlertDialogLayout;
 import androidx.appcompat.widget.Toolbar;
 
+import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Chronometer;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
 
+import com.shallow.remotestethoscope.base.DBHelper;
 import com.shallow.remotestethoscope.base.FileUtils;
 import com.shallow.remotestethoscope.mp3recorder.MP3Recorder;
 import com.shallow.remotestethoscope.waveview.AudioWaveView;
@@ -37,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private Chronometer chronometer;
 
-    private ImageButton play_pause_btn;
+    private ImageButton on_pause_btn;
     private ImageButton list_save_btn;
     private ImageButton cancel_record_btn;
 
@@ -46,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     MP3Recorder mRecorder;
     AudioWaveView audioWave;
+    DBHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Toolbar toolbar = findViewById(R.id.toolbar_main);
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
-//        audioWave = new AudioWaveView(this);
+        dbHelper = new DBHelper(this, "UserData.db", null, 1);
         chronometer = findViewById(R.id.timer);
         chronometer.setBase(0);
         chronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
@@ -68,10 +77,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        play_pause_btn = findViewById(R.id.on_pause_button);
+        on_pause_btn = findViewById(R.id.on_pause_button);
         list_save_btn = findViewById(R.id.list_save_button);
         cancel_record_btn = findViewById(R.id.cancel_record_button);
-        play_pause_btn.setOnClickListener(this);
+        cancel_record_btn.setEnabled(false);
+        cancel_record_btn.getBackground().setAlpha(100);
+        on_pause_btn.setOnClickListener(this);
         list_save_btn.setOnClickListener(this);
         cancel_record_btn.setOnClickListener(this);
 
@@ -87,13 +98,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         resolveRecord();
                         list_save_btn.setImageResource(R.mipmap.ic_action_correct);
                         ls_click_flag = false;
+                        cancel_record_btn.setEnabled(true);
+                        cancel_record_btn.getBackground().setAlpha(255);
                     } else {
                         chronometer.setBase(chronometer.getBase() + (SystemClock.elapsedRealtime() - mRecordTime));
                         resolvePause(false);
                     }
                     chronometer.start();
-                    play_pause_btn.setImageResource(R.mipmap.ic_action_pause);
-                    list_save_btn.setClickable(false);
+                    on_pause_btn.setImageResource(R.mipmap.ic_action_pause);
+                    list_save_btn.setEnabled(false);
                     list_save_btn.getBackground().setAlpha(100);
 
                 }
@@ -101,14 +114,67 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     chronometer.stop();
                     resolvePause(true);
                     mRecordTime = SystemClock.elapsedRealtime();
-                    play_pause_btn.setImageResource(R.mipmap.ic_action_play_arrow);
-                    list_save_btn.setClickable(false);
+                    on_pause_btn.setImageResource(R.mipmap.ic_action_play_arrow);
+                    list_save_btn.setEnabled(true);
                     list_save_btn.getBackground().setAlpha(255);
                 }
                 op_click_flag = !op_click_flag;
                 break;
 
             case R.id.list_save_button:
+                if (ls_click_flag) {
+                    Intent intent = new Intent(MainActivity.this, FileActivity.class);
+                    startActivity(intent);
+                } else {
+                    final EditText et = new EditText(this);
+
+                    new AlertDialog.Builder(this).setTitle("输入文件名")
+                            .setIcon(R.mipmap.ic_action_edit_file)
+                            .setView(et)
+                            .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    String basePath = FileUtils.getAppPath();
+                                    String input = et.getText().toString();
+                                    if (input.equals("")) {
+                                        Toast.makeText(MainActivity.this, "文件名不能为空", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        File audioFile = new File(filePath);
+                                        String newPath = basePath + File.separator + input + ".mp3";
+                                        if (new File(newPath).exists()) {
+                                            Toast.makeText(MainActivity.this, "文件名已存在", Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            audioFile.renameTo(new File(newPath));
+                                            SharedPreferences userSetting = getSharedPreferences("setting", 0);
+                                            String username = userSetting.getString("username", "");
+                                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINESE);
+                                            SQLiteDatabase db = dbHelper.getWritableDatabase();
+                                            db.beginTransaction();
+                                            try {
+                                                ContentValues values = new ContentValues();
+                                                values.put("mp3_file_name", input);
+                                                values.put("mp3_file_time", sdf.format(new Date()));
+                                                values.put("mp3_file_duration", chronometer.getText().toString());
+                                                values.put("username", username);
+                                                db.insert("AudioFile", null, values);
+                                                values.clear();
+                                                db.setTransactionSuccessful();
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            } finally {
+                                                db.endTransaction();
+                                            }
+                                        }
+                                    }
+                                }
+                            })
+                            .setNegativeButton("取消", null)
+                            .show();
+                }
+                break;
+
+            case R.id.cancel_record_button:
+                resolveReset();
                 break;
         }
     }
@@ -126,11 +192,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
 
-        int offset = dip2px(this, 1);
         filePath = FileUtils.getAppPath() + UUID.randomUUID().toString() + ".mp3";
         File mp3File = new File(filePath);
         mRecorder = new MP3Recorder(mp3File);
         audioWave = findViewById(R.id.audioWave);
+        int offset = dip2px(this, 1);
         int size = getScreenWidth(this) / offset;
         mRecorder.setDataList(audioWave.getRecList(), size);
 
@@ -152,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } catch (IOException e) {
             e.printStackTrace();
             Toast.makeText(this, "录音出现异常", Toast.LENGTH_SHORT).show();
-            resolveError();
+            resolveReset();
             return;
         }
         mIsRecord = true;
@@ -181,13 +247,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mIsRecord = false;
     }
 
-    private void resolveError() {
+    private void resolveReset() {
         FileUtils.deleteFile(filePath);
         filePath = "";
         if (mRecorder != null && mRecorder.isRecording()) {
             mRecorder.stop();
             audioWave.stopView();
         }
+
+        resolveNormalUI();
+    }
+
+    private void resolveNormalUI() {
+        on_pause_btn.setImageResource(R.mipmap.ic_action_play_arrow);
+        op_click_flag = true;
+        list_save_btn.setImageResource(R.mipmap.ic_action_bullet_list);
+        ls_click_flag = true;
+        cancel_record_btn.setEnabled(false);
+        cancel_record_btn.getBackground().setAlpha(100);
     }
 
     /**
@@ -223,4 +300,5 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         float fontScale = context.getResources().getDisplayMetrics().density;
         return (int) (dipValue * fontScale + 0.5f);
     }
+
 }

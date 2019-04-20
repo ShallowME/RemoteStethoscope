@@ -15,7 +15,17 @@
         android:gravity="center"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        tools:ignore="MissingConstraints" />
+        tools:ignore="MissingConstraints">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textSize="20sp"
+            android:textColor="@color/colorWhite"
+            android:textStyle="bold"
+            android:text="@string/app_name"/>
+    </androidx.appcompat.widget.Toolbar>
+
 
     <Chronometer
         android:id="@+id/timer"
@@ -30,7 +40,6 @@
 
     <com.shallow.remotestethoscope.waveview.AudioWaveView
         android:id="@+id/audioWave"
-        android:background="#000000"
         android:layout_width="match_parent"
         android:layout_height="150dp"
         android:layout_below="@+id/timer"
@@ -49,9 +58,8 @@
             android:id="@+id/cancel_record_button"
             android:layout_width="46dp"
             android:layout_height="46dp"
-            android:layout_marginRight="30dp"
+            android:layout_marginEnd="30dp"
             android:background="@drawable/ic_imagebutton_shape"
-            android:clickable="false"
             android:contentDescription="@string/cancel_record_button"
             app:srcCompat="@mipmap/ic_action_cross" />
 
@@ -67,7 +75,7 @@
             android:id="@+id/list_save_button"
             android:layout_width="46dp"
             android:layout_height="46dp"
-            android:layout_marginLeft="30dp"
+            android:layout_marginStart="30dp"
             android:background="@drawable/ic_imagebutton_shape"
             android:contentDescription="@string/list_save_button"
             app:layout_constraintBottom_toBottomOf="parent"

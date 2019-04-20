@@ -17,9 +17,10 @@ import com.shallow.remotestethoscope.base.DBHelper;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    private DBHelper dbHelper;
     private EditText username;
     private EditText password;
+
+    DBHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +70,7 @@ public class RegisterActivity extends AppCompatActivity {
                         Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
                         startActivity(intent);
                     }
+                    cursor.close();
                 } else {
                     if (uLength == 0 && pLength > 0) {
                         Toast.makeText(RegisterActivity.this, "用户名不能为空", Toast.LENGTH_SHORT).show();

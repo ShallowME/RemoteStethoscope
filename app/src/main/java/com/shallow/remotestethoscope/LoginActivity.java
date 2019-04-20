@@ -3,6 +3,7 @@ package com.shallow.remotestethoscope;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -17,11 +18,12 @@ import com.shallow.remotestethoscope.base.DBHelper;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private DBHelper dbHelper;
     private EditText username;
     private EditText password;
     private Button login_btn;
     private Button register_btn;
+
+    DBHelper dbHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,13 +44,17 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     public void login(String username, String password) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        String password_db = null;
+        String password_db;
         String query = "select * from Account where username is ?";
         Cursor cursor = db.rawQuery(query, new String[] {username});
         if (cursor.getCount() > 0) {
             if (cursor.moveToFirst()) {
                 password_db = cursor.getString(cursor.getColumnIndex("password"));
                 if (password.equals(password_db)) {
+                    SharedPreferences userSetting = getSharedPreferences("setting", 0);
+                    SharedPreferences.Editor editor = userSetting.edit();
+                    editor.putString("userName", username);
+                    editor.apply();
                     Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                     startActivity(intent);
                 } else {
@@ -58,7 +64,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         } else {
             Toast.makeText(this, "用户名不存在或用户名错误", Toast.LENGTH_SHORT).show();
         }
-
+        cursor.close();
     }
 
     @Override

@@ -1,7 +1,9 @@
 package com.shallow.remotestethoscope.mp3recorder;
 
 import android.media.AudioFormat;
+import android.media.AudioManager;
 import android.media.AudioRecord;
+import android.media.AudioTrack;
 import android.media.MediaRecorder;
 import android.os.Handler;
 import android.os.Process;
@@ -13,7 +15,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class MP3Recorder extends BaseRecorder {
-    //=======================AudioRecord Default Setting==========================
+    //=======================AudioRecord & AudioTrack Default Setting==========================
 
     //Use microphone as audio source
     private static final int DEFAULT_AUDIO_SOURCE = MediaRecorder.AudioSource.MIC;
@@ -21,8 +23,11 @@ public class MP3Recorder extends BaseRecorder {
     //Use 44.1kHz as sampling rate
     private static final int DEFAULT_SAMPLING_RATE = 44100;
 
-    //Use mono soundtrack
-    private static final int DEFAULT_CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;
+    //Use mono soundtrack while recording
+    private static final int DEFAULT_RECORD_CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;
+
+    //Use mono soundtrack while playing
+    private static final int DEFAULT_PLAY_CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;
 
     //Use PCM 16-byte encoding
     private static final PCMFormat DEFAULT_AUDIO_FORMAT = PCMFormat.PCM_16BIT;
@@ -46,6 +51,7 @@ public class MP3Recorder extends BaseRecorder {
     public static final int ERROR_TYPE = 22;
 
     private AudioRecord mAudioRecord = null;
+    private AudioTrack mAudioTrack = null;
     private DataEncodeThread mEncodeThread;
     private File mRecordFile;
     private ArrayList<Short> dataList;
@@ -56,7 +62,8 @@ public class MP3Recorder extends BaseRecorder {
     private boolean mSendError;
     private boolean mPause;
 
-    private int mBufferSize;
+    private int mRecBufferSize;
+    private int mPlayBufferSize;
 
     private int mMaxSize;
 
@@ -80,6 +87,7 @@ public class MP3Recorder extends BaseRecorder {
         initAudioRecorder();
         try {
             mAudioRecord.startRecording();
+            mAudioTrack.play();
         } catch (Exception e) {
             System.out.println("start recording error");
             e.printStackTrace();
@@ -92,7 +100,7 @@ public class MP3Recorder extends BaseRecorder {
             public void run() {
                 android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO);
                 while (mIsRecording) {
-                    int readSize = mAudioRecord.read(mPCMBuffer, 0, mBufferSize);
+                    int readSize = mAudioRecord.read(mPCMBuffer, 0, mRecBufferSize);
 
                     if (readSize == AudioRecord.ERROR_INVALID_OPERATION ||
                             readSize == AudioRecord.ERROR_BAD_VALUE) {
@@ -107,6 +115,11 @@ public class MP3Recorder extends BaseRecorder {
                             if (mPause) {
                                 continue;
                             }
+
+                            short[] tmpBuf = new short[readSize];
+                            System.arraycopy(mPCMBuffer, 0, tmpBuf, 0, readSize);
+                            mAudioTrack.write(tmpBuf, 0, tmpBuf.length);
+
                             mEncodeThread.addTask(mPCMBuffer, readSize);
                             calculateRealVolume(mPCMBuffer, readSize);
                             sendData(mPCMBuffer, readSize);
@@ -125,6 +138,10 @@ public class MP3Recorder extends BaseRecorder {
                     mAudioRecord.stop();
                     mAudioRecord.release();
                     mAudioRecord = null;
+
+                    mAudioTrack.stop();
+                    mAudioTrack.release();
+                    mAudioTrack = null;
                 } catch (Exception e) {
                     System.out.println("stop error");
                     e.printStackTrace();
@@ -153,13 +170,12 @@ public class MP3Recorder extends BaseRecorder {
                         min = shorts[j];
                         resultMin = min;
                     }
-                    synchronized (dataList) {
-                        if (dataList.size() > mMaxSize) {
-                            dataList.remove(0);
-                        }
-                        dataList.add(resultMax);
+                }
+                synchronized (dataList) {
+                    if (dataList.size() > mMaxSize) {
+                        dataList.remove(0);
                     }
-
+                    dataList.add(resultMax);
                 }
             }
         }
@@ -237,32 +253,42 @@ public class MP3Recorder extends BaseRecorder {
         this.mWaveSpeed = waveSpeed;
     }
 
+
+
     private void initAudioRecorder() throws IOException {
         //Get minimum size of buffer that saves sound data
-        mBufferSize = AudioRecord.getMinBufferSize(DEFAULT_SAMPLING_RATE,
-                DEFAULT_CHANNEL_CONFIG, DEFAULT_AUDIO_FORMAT.getAudioFormat());
+        mRecBufferSize = AudioRecord.getMinBufferSize(DEFAULT_SAMPLING_RATE,
+                DEFAULT_RECORD_CHANNEL_CONFIG, DEFAULT_AUDIO_FORMAT.getAudioFormat());
+
+        //Get minimum size of buffer that plays sound data
+        mPlayBufferSize = AudioTrack.getMinBufferSize(DEFAULT_SAMPLING_RATE,
+                DEFAULT_PLAY_CHANNEL_CONFIG, DEFAULT_AUDIO_FORMAT.getAudioFormat());
 
         int bytesPerFrame = DEFAULT_AUDIO_FORMAT.getBytePerFrame();
 
         // Get number of samples. Calculate the buffer size
         // (Round up to the factor of given frame size)
-        int frameSize = mBufferSize / bytesPerFrame;
+        int frameSize = mRecBufferSize / bytesPerFrame;
         if (frameSize % FRAME_COUNT != 0) {
             frameSize += (FRAME_COUNT - frameSize % FRAME_COUNT);
-            mBufferSize = frameSize * bytesPerFrame;
+            mRecBufferSize = frameSize * bytesPerFrame;
         }
 
         mAudioRecord = new AudioRecord(DEFAULT_AUDIO_SOURCE, DEFAULT_SAMPLING_RATE,
-                DEFAULT_CHANNEL_CONFIG, DEFAULT_AUDIO_FORMAT.getAudioFormat(), mBufferSize);
+                DEFAULT_RECORD_CHANNEL_CONFIG, DEFAULT_AUDIO_FORMAT.getAudioFormat(), mRecBufferSize);
 
-        mPCMBuffer = new short[mBufferSize];
+        mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, DEFAULT_SAMPLING_RATE,
+                DEFAULT_PLAY_CHANNEL_CONFIG, DEFAULT_AUDIO_FORMAT.getAudioFormat(), mPlayBufferSize,
+                AudioTrack.MODE_STREAM);
+
+        mPCMBuffer = new short[mRecBufferSize];
 
         //Initialize lame buffer
         //Mp3 sampling rate is the same as the recorded pam sampling rate
         //The bit rate is 32kbps
         LameUtil.init(DEFAULT_SAMPLING_RATE, DEFAULT_LAME_IN_CHANNEL, DEFAULT_SAMPLING_RATE, DEFAULT_LAME_MP3_BIT_RATE, DEFAULT_LAME_MP3_QUALITY);
 
-        mEncodeThread = new DataEncodeThread(mRecordFile, mBufferSize);
+        mEncodeThread = new DataEncodeThread(mRecordFile, mRecBufferSize);
         mEncodeThread.start();
         mAudioRecord.setRecordPositionUpdateListener(mEncodeThread, mEncodeThread.getHandler());
         mAudioRecord.setPositionNotificationPeriod(FRAME_COUNT);
