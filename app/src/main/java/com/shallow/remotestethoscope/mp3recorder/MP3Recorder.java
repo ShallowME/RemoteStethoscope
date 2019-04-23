@@ -27,7 +27,7 @@ public class MP3Recorder extends BaseRecorder {
     private static final int DEFAULT_RECORD_CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;
 
     //Use mono soundtrack while playing
-    private static final int DEFAULT_PLAY_CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_MONO;
+    private static final int DEFAULT_PLAY_CHANNEL_CONFIG = AudioFormat.CHANNEL_OUT_MONO;
 
     //Use PCM 16-byte encoding
     private static final PCMFormat DEFAULT_AUDIO_FORMAT = PCMFormat.PCM_16BIT;

@@ -171,4 +171,5 @@ public class DataEncodeThread extends HandlerThread implements AudioRecord.OnRec
             return readSize;
         }
     }
+
 }

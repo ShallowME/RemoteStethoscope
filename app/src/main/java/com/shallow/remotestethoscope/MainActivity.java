@@ -1,15 +1,17 @@
 package com.shallow.remotestethoscope;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AlertDialogLayout;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
@@ -164,6 +166,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                             } finally {
                                                 db.endTransaction();
                                             }
+                                            resolveStopRecord();
                                         }
                                     }
                                 }
@@ -174,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             case R.id.cancel_record_button:
-                resolveReset();
+                resolveCancel();
                 break;
         }
     }
@@ -183,6 +186,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * 开始录音
      */
     public void resolveRecord() {
+        checkPermissions();
         filePath = FileUtils.getAppPath();
         File file = new File(filePath);
         if (!file.exists()) {
@@ -192,8 +196,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
 
-        filePath = FileUtils.getAppPath() + UUID.randomUUID().toString() + ".mp3";
+        filePath = FileUtils.getAppPath();
+        File mp3Dir = new File(filePath);
+        judeDirExists(mp3Dir);
+        filePath = filePath + File.separator + UUID.randomUUID().toString() + ".mp3";
         File mp3File = new File(filePath);
+        judeFileExists(mp3File);
+
         mRecorder = new MP3Recorder(mp3File);
         audioWave = findViewById(R.id.audioWave);
         int offset = dip2px(this, 1);
@@ -218,7 +227,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } catch (IOException e) {
             e.printStackTrace();
             Toast.makeText(this, "录音出现异常", Toast.LENGTH_SHORT).show();
-            resolveReset();
+            resolveCancel();
             return;
         }
         mIsRecord = true;
@@ -239,22 +248,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * 停止录音
      */
     public void resolveStopRecord() {
+        filePath = "";
         if (mRecorder != null && mRecorder.isRecording()) {
             mRecorder.setPause(false);
             mRecorder.stop();
+            audioWave.setPause(false);
             audioWave.stopView();
         }
         mIsRecord = false;
+        resolveNormalUI();
     }
 
-    private void resolveReset() {
-        FileUtils.deleteFile(filePath);
-        filePath = "";
+    private void resolveCancel() {
+
         if (mRecorder != null && mRecorder.isRecording()) {
+            mRecorder.setPause(false);
             mRecorder.stop();
+            audioWave.setPause(false);
             audioWave.stopView();
         }
-
+        mIsRecord = false;
+        FileUtils.deleteFile(filePath);
+        filePath = "";
         resolveNormalUI();
     }
 
@@ -263,8 +278,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         op_click_flag = true;
         list_save_btn.setImageResource(R.mipmap.ic_action_bullet_list);
         ls_click_flag = true;
+        list_save_btn.setEnabled(true);
         cancel_record_btn.setEnabled(false);
         cancel_record_btn.getBackground().setAlpha(100);
+
+        chronometer.stop();
+        mRecordTime = 0;
+        chronometer.setBase(SystemClock.elapsedRealtime());
+        chronometer.setText(R.string.clock);
     }
 
     /**
@@ -299,6 +320,46 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public static int dip2px(Context context, float dipValue) {
         float fontScale = context.getResources().getDisplayMetrics().density;
         return (int) (dipValue * fontScale + 0.5f);
+    }
+
+    public void judeFileExists(File file) {
+        if (file.exists()) {
+            System.out.println("file exists");
+        } else {
+            System.out.println("file not exists, create it ...");
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // 判断文件夹是否存在
+     public void judeDirExists(File file) {
+        if (file.exists()) {
+            if (file.isDirectory()) {
+                System.out.println("dir exists");
+            } else {
+                System.out.println("the same name file exists, can not create dir");
+            }
+        } else {
+            System.out.println("dir not exists, create it ...");
+            file.mkdir();
+        }
+    }
+
+    private void checkPermissions() {
+        PackageManager pm = getPackageManager();
+        boolean permission_recordAudio = (PackageManager.PERMISSION_GRANTED == this.checkCallingOrSelfPermission("android.permission.RECORD_AUDIO"));
+        boolean permission_readExternalStorage = (PackageManager.PERMISSION_GRANTED == this.checkCallingOrSelfPermission("android.permission.READ_EXTERNAL_STORAGE"));
+        boolean permission_writeExternalStorage = (PackageManager.PERMISSION_GRANTED == this.checkCallingOrSelfPermission("android.permission.WRITE_EXTERNAL_STORAGE"));
+
+        if (!(permission_recordAudio && permission_readExternalStorage && permission_writeExternalStorage)) {
+            ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.RECORD_AUDIO, Manifest.permission.READ_EXTERNAL_STORAGE,
+                                    Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0x01);
+        }
+
     }
 
 }

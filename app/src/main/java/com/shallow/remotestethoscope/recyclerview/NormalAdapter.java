@@ -11,13 +11,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.shallow.remotestethoscope.R;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class NormalAdapter extends RecyclerView.Adapter<NormalAdapter.VH> {
 
-    private List<ObjectModel> mDatas;
+    private ArrayList<ObjectModel> mDatas;
 
-    public NormalAdapter(List<ObjectModel> data) {
+    public NormalAdapter(ArrayList<ObjectModel> data) {
         this.mDatas = data;
     }
 
