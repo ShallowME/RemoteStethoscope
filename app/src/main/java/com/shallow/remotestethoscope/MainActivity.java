@@ -19,6 +19,7 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Chronometer;
 import android.widget.EditText;
@@ -130,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 } else {
                     final EditText et = new EditText(this);
 
-                    new AlertDialog.Builder(this).setTitle("输入文件名")
+                    AlertDialog dialog = new AlertDialog.Builder(this).setTitle("输入文件名")
                             .setIcon(R.mipmap.ic_action_edit_file)
                             .setView(et)
                             .setPositiveButton("确定", new DialogInterface.OnClickListener() {
@@ -147,6 +148,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                             Toast.makeText(MainActivity.this, "文件名已存在", Toast.LENGTH_SHORT).show();
                                         } else {
                                             audioFile.renameTo(new File(newPath));
+                                            FileUtils.deleteFile(filePath);
                                             SharedPreferences userSetting = getSharedPreferences("setting", 0);
                                             String username = userSetting.getString("username", "");
                                             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.CHINESE);
@@ -173,6 +175,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             })
                             .setNegativeButton("取消", null)
                             .show();
+                    Window window = dialog.getWindow();
+                    WindowManager.LayoutParams params = window.getAttributes();
+                    params.width = WindowManager.LayoutParams.MATCH_PARENT;
+                    params.height = WindowManager.LayoutParams.WRAP_CONTENT;
+                    window.setAttributes(params);
                 }
                 break;
 
@@ -279,8 +286,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         list_save_btn.setImageResource(R.mipmap.ic_action_bullet_list);
         ls_click_flag = true;
         list_save_btn.setEnabled(true);
+        list_save_btn.getBackground().setAlpha(255);
         cancel_record_btn.setEnabled(false);
-        cancel_record_btn.getBackground().setAlpha(100);
+        cancel_record_btn.getBackground().setAlpha(255);
 
         chronometer.stop();
         mRecordTime = 0;

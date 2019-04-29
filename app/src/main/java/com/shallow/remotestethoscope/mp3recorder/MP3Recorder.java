@@ -5,8 +5,12 @@ import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.media.MediaRecorder;
+import android.media.audiofx.AcousticEchoCanceler;
+import android.media.audiofx.NoiseSuppressor;
 import android.os.Handler;
 import android.os.Process;
+
+
 import com.shallow.remotestethoscope.base.BaseRecorder;
 import com.shallow.remotestethoscope.mp3recorder.util.LameUtil;
 
@@ -14,11 +18,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import static android.content.ContentValues.TAG;
+
 public class MP3Recorder extends BaseRecorder {
     //=======================AudioRecord & AudioTrack Default Setting==========================
 
     //Use microphone as audio source
-    private static final int DEFAULT_AUDIO_SOURCE = MediaRecorder.AudioSource.MIC;
+    private static final int DEFAULT_AUDIO_SOURCE = MediaRecorder.AudioSource.VOICE_COMMUNICATION;
 
     //Use 44.1kHz as sampling rate
     private static final int DEFAULT_SAMPLING_RATE = 44100;
@@ -52,6 +58,8 @@ public class MP3Recorder extends BaseRecorder {
 
     private AudioRecord mAudioRecord = null;
     private AudioTrack mAudioTrack = null;
+    private AcousticEchoCanceler acousticEchoCanceler;
+    private NoiseSuppressor noiseSuppressor;
     private DataEncodeThread mEncodeThread;
     private File mRecordFile;
     private ArrayList<Short> dataList;
@@ -69,6 +77,8 @@ public class MP3Recorder extends BaseRecorder {
 
     private int mWaveSpeed = 300;
 
+    private int audioSessionId = -1;
+
     /**
      * Default constructor. Setup recorder with default sampling rate, mono channel
      * and 10 bits PCM
@@ -85,6 +95,7 @@ public class MP3Recorder extends BaseRecorder {
         }
         mIsRecording = true;
         initAudioRecorder();
+
         try {
             mAudioRecord.startRecording();
             mAudioTrack.play();
@@ -118,6 +129,8 @@ public class MP3Recorder extends BaseRecorder {
 
                             short[] tmpBuf = new short[readSize];
                             System.arraycopy(mPCMBuffer, 0, tmpBuf, 0, readSize);
+                            calc(tmpBuf, 0, tmpBuf.length);
+
                             mAudioTrack.write(tmpBuf, 0, tmpBuf.length);
 
                             mEncodeThread.addTask(mPCMBuffer, readSize);
@@ -142,6 +155,7 @@ public class MP3Recorder extends BaseRecorder {
                     mAudioTrack.stop();
                     mAudioTrack.release();
                     mAudioTrack = null;
+
                 } catch (Exception e) {
                     System.out.println("stop error");
                     e.printStackTrace();
@@ -277,9 +291,10 @@ public class MP3Recorder extends BaseRecorder {
         mAudioRecord = new AudioRecord(DEFAULT_AUDIO_SOURCE, DEFAULT_SAMPLING_RATE,
                 DEFAULT_RECORD_CHANNEL_CONFIG, DEFAULT_AUDIO_FORMAT.getAudioFormat(), mRecBufferSize);
 
-        mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, DEFAULT_SAMPLING_RATE,
-                DEFAULT_PLAY_CHANNEL_CONFIG, DEFAULT_AUDIO_FORMAT.getAudioFormat(), mPlayBufferSize,
-                AudioTrack.MODE_STREAM);
+        audioSessionId = mAudioRecord.getAudioSessionId();
+        initAEC();
+        initNS();
+        initAudioTrack();
 
         mPCMBuffer = new short[mRecBufferSize];
 
@@ -306,6 +321,50 @@ public class MP3Recorder extends BaseRecorder {
                     deleteFile(filePath + File.separator + filePath);
                 }
             }
+        }
+    }
+
+    private void initAudioTrack() {
+        if (mAudioTrack == null) {
+            if (audioSessionId == -1) {
+                mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, DEFAULT_SAMPLING_RATE,
+                        DEFAULT_PLAY_CHANNEL_CONFIG, DEFAULT_AUDIO_FORMAT.getAudioFormat(), mPlayBufferSize,
+                        AudioTrack.MODE_STREAM);
+            } else {
+                mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, DEFAULT_SAMPLING_RATE,
+                        DEFAULT_PLAY_CHANNEL_CONFIG, DEFAULT_AUDIO_FORMAT.getAudioFormat(), mPlayBufferSize,
+                        AudioTrack.MODE_STREAM, audioSessionId);
+            }
+        }
+    }
+
+    private void initAEC() {
+        if (AcousticEchoCanceler.isAvailable()) {
+            if (acousticEchoCanceler == null) {
+                acousticEchoCanceler = AcousticEchoCanceler.create(audioSessionId);
+                if (acousticEchoCanceler != null) {
+                    acousticEchoCanceler.setEnabled(true);
+                }
+            }
+        }
+    }
+
+    private void initNS() {
+        if (NoiseSuppressor.isAvailable()) {
+            if (noiseSuppressor == null) {
+                noiseSuppressor = NoiseSuppressor.create(audioSessionId);
+                if (noiseSuppressor != null) {
+                    noiseSuppressor.setEnabled(true);
+                }
+            }
+        }
+    }
+
+     private void calc(short[] lin,int off,int len) {
+        int i,j;
+        for (i = 0; i < len; i++) {
+            j = lin[i+off];
+            lin[i+off] = (short)(j>>2);
         }
     }
 

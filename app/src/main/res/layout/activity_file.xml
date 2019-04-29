@@ -6,9 +6,102 @@
     android:layout_height="match_parent"
     tools:context=".FileActivity">
 
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_file"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@color/colorBase"
+        android:gravity="center"
+        android:minHeight="80dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:navigationIcon="@mipmap/ic_action_arrow_back_left_navigation_previous"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        tools:ignore="MissingConstraints">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/file_list"
+            android:textColor="@color/colorWhite"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+    </androidx.appcompat.widget.Toolbar>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/fileList"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/toolbar_file"
+        android:layout_marginTop="0dp" />
+
+    <LinearLayout
+        android:id="@+id/fileOperateMenu"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:background="@drawable/ic_layout_border"
+        android:visibility="invisible">
+
+        <ImageButton
+            android:id="@+id/cancel_operate_button"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:contentDescription="@string/cancel_operate_button"
+            android:background="@drawable/ic_transparent"
+            app:srcCompat="@mipmap/ic_action_cross" />
+
+        <TextView
+            android:id="@+id/separator_left"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="@string/separator"
+            android:textAlignment="center"
+            android:textColor="@color/colorNormal"
+            android:textSize="50sp"/>
+
+        <ImageButton
+            android:id="@+id/delete_file_button"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="30dp"
+            android:layout_gravity="center"
+            android:background="@drawable/ic_boarder_button_shape_button"
+            app:srcCompat="@mipmap/ic_action_trash"
+            android:contentDescription="@string/delete_file_button" />
+
+        <ImageButton
+            android:id="@+id/rename_file_button"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="50dp"
+            android:layout_gravity="center"
+            android:background="@drawable/ic_boarder_button_shape_button"
+            app:srcCompat="@mipmap/ic_action_edit_file"
+            android:contentDescription="@string/delete_file_button" />
+
+        <TextView
+            android:id="@+id/separator_right"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginStart="30dp"
+            android:text="@string/separator"
+            android:textAlignment="center"
+            android:textColor="@color/colorNormal"
+            android:textSize="50sp"/>
+
+        <ImageButton
+            android:id="@+id/select_all_button"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginStart="2dp"
+            android:contentDescription="@string/cancel_operate_button"
+            android:background="@drawable/ic_transparent"
+            app:srcCompat="@mipmap/ic_action_done_all" />
+
+    </LinearLayout>
 
 </RelativeLayout>

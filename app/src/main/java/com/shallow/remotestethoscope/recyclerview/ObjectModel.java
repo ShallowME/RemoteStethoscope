@@ -4,6 +4,7 @@ public class ObjectModel {
     public String mp3Name;
     public String mp3Detail;
     public int mp3Img;
+    public boolean mp3Status;
 
     public ObjectModel() { }
 
@@ -35,5 +36,13 @@ public class ObjectModel {
 
     public void setMp3Img(int mp3Img) {
         this.mp3Img = mp3Img;
+    }
+
+    public boolean isMp3Status() {
+        return mp3Status;
+    }
+
+    public void setMp3Status(boolean mp3Status) {
+        this.mp3Status = mp3Status;
     }
 }

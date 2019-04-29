@@ -78,8 +78,6 @@
             android:layout_marginStart="30dp"
             android:background="@drawable/ic_imagebutton_shape"
             android:contentDescription="@string/list_save_button"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@mipmap/ic_action_bullet_list" />
 
 

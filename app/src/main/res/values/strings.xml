@@ -3,10 +3,16 @@
     <string name="on_pause_button">On_Pause_Button</string>
     <string name="list_save_button">List_Save_Button</string>
     <string name="cancel_record_button">Cancel_Record_Button</string>
+    <string name="cancel_operate_button">Cancel_Operate_Button</string>
+    <string name="delete_file_button">Delete_File_Button</string>
+    <string name="rename_file_button">Rename_File_Button</string>
+    <string name="select_all_button">Select_All_Button</string>
     <string name="clock">00:00:00</string>
     <string name="login_title">欢迎使用</string>
     <string name="user_name">Username</string>
     <string name="password">Password</string>
     <string name="register">注册</string>
     <string name="login_btn">登录</string>
+    <string name="file_list">录音文件</string>
+    <string name="separator"> | </string>
 </resources>
