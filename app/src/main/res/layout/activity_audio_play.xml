@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AudioPlayActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_audio"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@color/colorBase"
+        android:gravity="center"
+        android:minHeight="80dp"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+        app:navigationIcon="@mipmap/ic_action_arrow_back_left_navigation_previous"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+        tools:ignore="MissingConstraints">
+
+        <TextView
+            android:id="@+id/audioFileName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textColor="@color/colorWhite"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+    </androidx.appcompat.widget.Toolbar>
+
+    <com.shallow.remotestethoscope.waveview.AudioWaveView
+        android:id="@+id/audioWavePlay"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_below="@+id/toolbar_audio"
+        android:layout_marginTop="60dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/audioWavePlay"
+        android:orientation="horizontal">
+
+        <SeekBar
+            android:id="@+id/seekBar"
+            android:layout_width="310dp"
+            android:layout_height="wrap_content"
+            android:outlineSpotShadowColor="@color/colorBase"/>
+
+
+        <Chronometer
+            android:id="@+id/timer_audio"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:format="00:00:00"
+            android:textColor="@color/colorBase"
+            android:textAlignment="center"
+            android:layout_marginStart="0dp"
+            android:gravity="center"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="180dp">
+
+        <ImageButton
+            android:id="@+id/mp3_play_pause"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="@drawable/ic_boarder_button_shape_button"
+            android:contentDescription="@string/mp3_play_pause"
+            app:srcCompat="@mipmap/ic_action_pause"/>
+
+        <ImageButton
+            android:id="@+id/mp3_delete"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="@drawable/ic_boarder_button_shape_button"
+            android:contentDescription="@string/mp3_delete"
+            android:layout_marginStart="50dp"
+            app:srcCompat="@mipmap/ic_action_trash"/>
+
+
+    </LinearLayout>
+
+
+</RelativeLayout>

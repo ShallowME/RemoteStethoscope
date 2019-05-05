@@ -11,13 +11,16 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import com.shallow.remotestethoscope.base.DBHelper;
+import com.shallow.remotestethoscope.base.FileUtils;
 import com.shallow.remotestethoscope.recyclerview.NormalAdapter;
 import com.shallow.remotestethoscope.recyclerview.ObjectModel;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class FileActivity extends AppCompatActivity implements View.OnClickListener {
@@ -68,6 +71,25 @@ public class FileActivity extends AppCompatActivity implements View.OnClickListe
         mNoHeaderAdapter.setRecyclerView(mRecyclerView);
         operateMenu = findViewById(R.id.fileOperateMenu);
         mNoHeaderAdapter.setOperateMenu(operateMenu);
+
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.i("FileActivity", "OnStart");
+        String rootPath = FileUtils.getAppPath();
+        String tmpPath = rootPath + mNoHeaderAdapter.getMp3Play() + ".mp3";
+        if (! new File(tmpPath).exists()) {
+            ArrayList<ObjectModel> datas = mNoHeaderAdapter.getDatas();
+            for (ObjectModel ob : datas) {
+                if (ob.getMp3Name().equals(mNoHeaderAdapter.getMp3Play())) {
+                    datas.remove(ob);
+                }
+            }
+            mNoHeaderAdapter.setDatas(datas);
+            mNoHeaderAdapter.notifyDataSetChanged();
+        }
 
     }
 

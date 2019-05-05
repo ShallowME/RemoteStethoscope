@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.ColorDrawable;
 import android.view.Gravity;
@@ -22,6 +23,9 @@ import android.widget.Toast;
 import androidx.annotation.FontRes;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.shallow.remotestethoscope.AudioPlayActivity;
+import com.shallow.remotestethoscope.FileActivity;
 import com.shallow.remotestethoscope.R;
 import com.shallow.remotestethoscope.base.DBHelper;
 import com.shallow.remotestethoscope.base.FileUtils;
@@ -43,12 +47,14 @@ public class NormalAdapter extends RecyclerView.Adapter<NormalAdapter.VH> {
 
     private int file_status = NORMAL;
 
-    private ArrayList<ObjectModel> mDatas;
+    public ArrayList<ObjectModel> mDatas;
     private Context mContext;
     private DBHelper mDBhelper;
 
     private RecyclerView recyclerView;
     private LinearLayout operateMenu;
+
+    private String mp3Play;
 
     public NormalAdapter(ArrayList<ObjectModel> data, Context context, DBHelper dbHelper) {
         this.mDatas = data;
@@ -88,6 +94,10 @@ public class NormalAdapter extends RecyclerView.Adapter<NormalAdapter.VH> {
             @Override
             public void onClick(View v) {
                 if (file_status == NORMAL) {
+                    Intent intent = new Intent(mContext, AudioPlayActivity.class);
+                    intent.putExtra("mp3Name", model.getMp3Name());
+                    setMp3Play(model.getMp3Name());
+                    mContext.startActivity(intent);
 
                 } else {
                     if (!model.isMp3Status()) {
@@ -236,8 +246,8 @@ public class NormalAdapter extends RecyclerView.Adapter<NormalAdapter.VH> {
 
                                 String oldName = tmpOB.getMp3Name();
                                 String rootPath = FileUtils.getAppPath();
-                                String oldFilePath = rootPath + File.separator + oldName + ".mp3";
-                                String newFilePath = rootPath + File.separator + oldName + ".mp3";
+                                String oldFilePath = rootPath + oldName + ".mp3";
+                                String newFilePath = rootPath + newName + ".mp3";
 
                                 File oldFile = new File(oldFilePath);
                                 File newFile = new File(newFilePath);
@@ -288,4 +298,19 @@ public class NormalAdapter extends RecyclerView.Adapter<NormalAdapter.VH> {
         notifyDataSetChanged();
     }
 
+    public String getMp3Play() {
+        return mp3Play;
+    }
+
+    public void setMp3Play(String mp3Play) {
+        this.mp3Play = mp3Play;
+    }
+
+    public ArrayList<ObjectModel> getDatas() {
+        return mDatas;
+    }
+
+    public void setDatas(ArrayList<ObjectModel> datas) {
+        this.mDatas = datas;
+    }
 }

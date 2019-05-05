@@ -1,5 +1,6 @@
 package com.shallow.remotestethoscope.waveview;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
@@ -72,23 +73,11 @@ public class AudioWaveView extends View {
 
     private int mWaveColor = Color.parseColor("#E55D61");
 
-    private int mColorPoint = 1;
-
-    private int mPreFFtCurrentFrequency;
-
-    private int mColorChangeFlag;
-
-    private int mColorFirst = Color.argb(0xfa, 0x6f, 0xff, 0x81);
-
-    private int mColorSecond = Color.argb(0xfa, 0xff, 0xff, 0xff);
-
-    private int mColorThird = Color.argb(0xfa, 0x42, 0xff, 0xff);
-
     private DrawThread mInnerThread;
 
     private int mDrawStartOffset = 0;
 
-    //    @SuppressLint("HandlerLeak")
+//        @SuppressLint("HandlerLeak")
     Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -137,10 +126,6 @@ public class AudioWaveView extends View {
         }
     }
 
-//    public AudioWaveView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-//        super(context, attrs, defStyleAttr, defStyleRes);
-//        init(context,attrs);
-//    }
 
     public void init(Context context, AttributeSet attrs) {
         mContext = context;
@@ -148,7 +133,7 @@ public class AudioWaveView extends View {
             return;
         }
         if (attrs != null) {
-            TypedArray ta = getContext().obtainStyledAttributes(attrs, R.styleable.waveView);
+            @SuppressLint("CustomViewStyleable") TypedArray ta = getContext().obtainStyledAttributes(attrs, R.styleable.waveView);
             mOffset = ta.getInt(R.styleable.waveView_waveOffset, dip2px(context, -11));
             mWaveColor = ta.getColor(R.styleable.waveView_waveColor, Color.parseColor("#E55D61"));
             mWaveCount = ta.getInt(R.styleable.waveView_waveCount, 2);
@@ -213,9 +198,7 @@ public class AudioWaveView extends View {
 
                 if (!mPause) {
                     resolveToWaveData(dataList);
-                    if (dataList.size() > 0) {
-                        updateColor();
-                    }
+
                     if (mBackCanvas != null) {
                         mBackCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
                         int drawBufSize = dataList.size();
@@ -324,55 +307,6 @@ public class AudioWaveView extends View {
         }
     }
 
-    private void updateColor() {
-        if (mBaseRecorder == null) {
-            return;
-        }
-
-        int volume = mBaseRecorder.getRealVolume();
-//        Log.e("Volume", "Volume" + volume);
-
-        int scale = volume / 100;
-
-        if (scale < 5) {
-            mPreFFtCurrentFrequency = scale;
-            return;
-        }
-
-        int fftScale = 0;
-        if (mPreFFtCurrentFrequency != 0) {
-            fftScale = scale / mPreFFtCurrentFrequency;
-        }
-
-        if (mColorChangeFlag == 4 || fftScale > 10) {
-            mColorChangeFlag = 0;
-        }
-
-        if (mColorChangeFlag == 0) {
-            if (mColorPoint == 1) {
-                mColorPoint = 2;
-            } else if (mColorPoint == 2) {
-                mColorPoint = 3;
-            } else if (mColorPoint == 3) {
-                mColorPoint = 1;
-            }
-
-            int color;
-            if (mColorPoint == 1) {
-                color = Color.argb(mAlphaByVolume ? 50 * scale : 0xff, Color.red(mColorFirst), Color.green(mColorFirst), Color.blue(mColorFirst));
-            } else if (mColorPoint == 2) {
-                color = Color.argb(mAlphaByVolume ? 50 * scale : 0xff, Color.red(mColorSecond), Color.green(mColorSecond), Color.blue(mColorSecond));
-            } else {
-                color = Color.argb(mAlphaByVolume ? 50 * scale : 0xff, Color.red(mColorThird), Color.green(mColorThird), Color.blue(mColorThird));
-            }
-            mPaint.setColor(color);
-        }
-        mColorChangeFlag++;
-
-        if (scale != 0) {
-            mPreFFtCurrentFrequency = scale;
-        }
-    }
 
     /**
      * 开始绘制
@@ -391,7 +325,7 @@ public class AudioWaveView extends View {
 
     /**
      * 停止绘制
-     * @param cleanView 清空画不标志位
+     * @param cleanView 清空画布标志位
      */
     public void stopView(boolean cleanView) {
         mIsDraw = false;
@@ -425,11 +359,11 @@ public class AudioWaveView extends View {
         this.mContext = context;
     }
 
-    public void setChangeColor(int colorFirst, int colorSecond, int colorThird) {
-        this.mColorFirst = colorFirst;
-        this.mColorSecond = colorSecond;
-        this.mColorThird = colorThird;
-    }
+//    public void setChangeColor(int colorFirst, int colorSecond, int colorThird) {
+//        this.mColorFirst = colorFirst;
+//        this.mColorSecond = colorSecond;
+//        this.mColorThird = colorThird;
+//    }
 
     public void setmAlphaByVolume(boolean mAlphaByVolume) {
         this.mAlphaByVolume = mAlphaByVolume;

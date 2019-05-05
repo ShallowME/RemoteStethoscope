@@ -14,10 +14,12 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -67,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
         dbHelper = new DBHelper(this, "UserData.db", null, 1);
-        chronometer = findViewById(R.id.timer);
+        chronometer = findViewById(R.id.timer_record);
         chronometer.setBase(0);
         chronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
             @Override
@@ -143,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                         Toast.makeText(MainActivity.this, "文件名不能为空", Toast.LENGTH_SHORT).show();
                                     } else {
                                         File audioFile = new File(filePath);
-                                        String newPath = basePath + File.separator + input + ".mp3";
+                                        String newPath = basePath + input + ".mp3";
                                         if (new File(newPath).exists()) {
                                             Toast.makeText(MainActivity.this, "文件名已存在", Toast.LENGTH_SHORT).show();
                                         } else {
@@ -195,12 +197,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void resolveRecord() {
         checkPermissions();
         filePath = FileUtils.getAppPath();
-        File file = new File(filePath);
-        if (!file.exists()) {
-            if (!file.mkdir()) {
-                Toast.makeText(this, "创建文件失败", Toast.LENGTH_SHORT).show();
-                return;
+        try {
+            File file = new File(filePath);
+            if (!file.exists()) {
+                if (!file.mkdir()) {
+                    Toast.makeText(this, "创建文件失败", Toast.LENGTH_SHORT).show();
+                    return;
+                }
             }
+        } catch (Exception e) {
+            Log.e("FileCreate", e + "");
         }
 
         filePath = FileUtils.getAppPath();
@@ -292,7 +298,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         chronometer.stop();
         mRecordTime = 0;
-        chronometer.setBase(SystemClock.elapsedRealtime());
         chronometer.setText(R.string.clock);
     }
 

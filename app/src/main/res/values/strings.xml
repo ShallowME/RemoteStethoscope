@@ -7,6 +7,8 @@
     <string name="delete_file_button">Delete_File_Button</string>
     <string name="rename_file_button">Rename_File_Button</string>
     <string name="select_all_button">Select_All_Button</string>
+    <string name="mp3_play_pause">MP3_Play_Pause_Button</string>
+    <string name="mp3_delete">MP3_Delete_Button</string>
     <string name="clock">00:00:00</string>
     <string name="login_title">欢迎使用</string>
     <string name="user_name">Username</string>
