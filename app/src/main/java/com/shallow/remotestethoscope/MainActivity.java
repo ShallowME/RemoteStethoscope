@@ -14,7 +14,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
@@ -29,6 +28,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 
 
+import com.shallow.remotestethoscope.base.ConstantUtil;
 import com.shallow.remotestethoscope.base.DBHelper;
 import com.shallow.remotestethoscope.base.FileUtils;
 import com.shallow.remotestethoscope.mp3recorder.MP3Recorder;
@@ -66,10 +66,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar_main);
-        toolbar.setTitle("");
+        toolbar.setNavigationOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
         setSupportActionBar(toolbar);
         dbHelper = new DBHelper(this, "UserData.db", null, 1);
-        chronometer = findViewById(R.id.timer_record);
+        chronometer = findViewById(R.id.timer_tone);
         chronometer.setBase(0);
         chronometer.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
             @Override
@@ -82,9 +87,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
-        on_pause_btn = findViewById(R.id.on_pause_button);
-        list_save_btn = findViewById(R.id.list_save_button);
-        cancel_record_btn = findViewById(R.id.cancel_record_button);
+        on_pause_btn = findViewById(R.id.on_pause_tone);
+        list_save_btn = findViewById(R.id.list_save_tone);
+        cancel_record_btn = findViewById(R.id.cancel_record_tone);
         cancel_record_btn.setEnabled(false);
         cancel_record_btn.getBackground().setAlpha(100);
         on_pause_btn.setOnClickListener(this);
@@ -96,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
         switch(v.getId()) {
-            case R.id.on_pause_button:
+            case R.id.on_pause_tone:
                 if (op_click_flag) {
                     if (mRecordTime == 0) {
                         chronometer.setBase(SystemClock.elapsedRealtime());
@@ -114,8 +119,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     list_save_btn.setEnabled(false);
                     list_save_btn.getBackground().setAlpha(100);
 
-                }
-                else {
+                } else {
                     chronometer.stop();
                     resolvePause(true);
                     mRecordTime = SystemClock.elapsedRealtime();
@@ -126,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 op_click_flag = !op_click_flag;
                 break;
 
-            case R.id.list_save_button:
+            case R.id.list_save_tone:
                 if (ls_click_flag) {
                     Intent intent = new Intent(MainActivity.this, FileActivity.class);
                     startActivity(intent);
@@ -185,7 +189,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 break;
 
-            case R.id.cancel_record_button:
+            case R.id.cancel_record_tone:
                 resolveCancel();
                 break;
         }
@@ -211,13 +215,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         filePath = FileUtils.getAppPath();
         File mp3Dir = new File(filePath);
-        judeDirExists(mp3Dir);
+        judgeDirExists(mp3Dir);
         filePath = filePath + File.separator + UUID.randomUUID().toString() + ".mp3";
         File mp3File = new File(filePath);
-        judeFileExists(mp3File);
+        judgeFileExists(mp3File);
 
         mRecorder = new MP3Recorder(mp3File);
-        audioWave = findViewById(R.id.audioWave);
+        audioWave = findViewById(R.id.audioWaveTone);
         int offset = dip2px(this, 1);
         int size = getScreenWidth(this) / offset;
         mRecorder.setDataList(audioWave.getRecList(), size);
@@ -236,11 +240,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         try {
             mRecorder.start();
-            audioWave.startView();
+            audioWave.startView(ConstantUtil.DRAW_TONE);
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(this, "录音出现异常", Toast.LENGTH_SHORT).show();
             resolveCancel();
+            Toast.makeText(this, "录音出现异常", Toast.LENGTH_SHORT).show();
             return;
         }
         mIsRecord = true;
@@ -335,7 +339,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return (int) (dipValue * fontScale + 0.5f);
     }
 
-    public void judeFileExists(File file) {
+    public void judgeFileExists(File file) {
         if (file.exists()) {
             System.out.println("file exists");
         } else {
@@ -349,7 +353,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     // 判断文件夹是否存在
-     public void judeDirExists(File file) {
+     public void judgeDirExists(File file) {
         if (file.exists()) {
             if (file.isDirectory()) {
                 System.out.println("dir exists");

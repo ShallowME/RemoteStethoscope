@@ -6,4 +6,20 @@
         <attr name="waveOffset" format="dimension"/>
         <attr name="waveCount" format="dimension"/>
     </declare-styleable>
+
+    <declare-styleable name="SwitchButton">
+        <attr name="borderWidth" format="dimension">
+        </attr>
+        <attr name="offBorderColor" format="reference|color">
+        </attr>
+        <attr name="offColor" format="reference|color">
+        </attr>
+        <attr name="onColor" format="reference|color">
+        </attr>
+        <attr name="spotColor" format="reference|color">
+        </attr>
+        <attr name="animate" format="reference|boolean">
+        </attr>
+    </declare-styleable>
+
 </resources>

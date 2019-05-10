@@ -11,10 +11,21 @@
     <string name="mp3_delete">MP3_Delete_Button</string>
     <string name="clock">00:00:00</string>
     <string name="login_title">欢迎使用</string>
+    <string name="function_choose">功能选择</string>
+    <string name="function_choose_tone">体音信号</string>
+    <string name="function_choose_emg">肌电信号</string>
     <string name="user_name">Username</string>
     <string name="password">Password</string>
     <string name="register">注册</string>
     <string name="login_btn">登录</string>
     <string name="file_list">录音文件</string>
+    <string name="search_devices">搜索设备</string>
+    <string name="tone_display">体音信号波形</string>
+    <string name="emg_display">肌电信号波形</string>
     <string name="separator"> | </string>
+    <string name="mp3_name">MP3 Name</string>
+    <string name="date_and_duration">Date | Duration</string>
+    <string name="device_name">Device Name</string>
+    <string name="mac_address">MAC Address</string>
+    <string name="rssi">Rssi</string>
 </resources>

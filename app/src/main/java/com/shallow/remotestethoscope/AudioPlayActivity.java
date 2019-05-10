@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import com.shallow.remotestethoscope.audio.MP3AudioStreamDelegate;
 import com.shallow.remotestethoscope.audio.MP3AudioStreamPlayer;
+import com.shallow.remotestethoscope.base.ConstantUtil;
 import com.shallow.remotestethoscope.base.DBHelper;
 import com.shallow.remotestethoscope.base.FileUtils;
 import com.shallow.remotestethoscope.waveview.AudioWaveView;
@@ -177,7 +178,7 @@ public class AudioPlayActivity extends AppCompatActivity implements MP3AudioStre
         player.setDataList(audioWave.getRecList(), size);
 
         audioWave.setBaseRecorder(player);
-        audioWave.startView();
+        audioWave.startView(ConstantUtil.DRAW_TONE);
         try {
             player.play();
         } catch (IOException e) {

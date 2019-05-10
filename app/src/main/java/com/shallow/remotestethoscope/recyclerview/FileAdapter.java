@@ -6,8 +6,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.drawable.ColorDrawable;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,16 +14,13 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.FontRes;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.shallow.remotestethoscope.AudioPlayActivity;
-import com.shallow.remotestethoscope.FileActivity;
 import com.shallow.remotestethoscope.R;
 import com.shallow.remotestethoscope.base.DBHelper;
 import com.shallow.remotestethoscope.base.FileUtils;
@@ -35,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-public class NormalAdapter extends RecyclerView.Adapter<NormalAdapter.VH> {
+public class FileAdapter extends RecyclerView.Adapter<FileAdapter.VH> {
     public static final int NORMAL = 1;
     public static final int OPERATE = 2;
     public static final int SELECT_ALL = 3;
@@ -47,19 +42,19 @@ public class NormalAdapter extends RecyclerView.Adapter<NormalAdapter.VH> {
 
     private int file_status = NORMAL;
 
-    public ArrayList<ObjectModel> mDatas;
+    private ArrayList<FileModel> mDatas;
     private Context mContext;
-    private DBHelper mDBhelper;
+    private DBHelper mDBHelper;
 
     private RecyclerView recyclerView;
     private LinearLayout operateMenu;
 
     private String mp3Play;
 
-    public NormalAdapter(ArrayList<ObjectModel> data, Context context, DBHelper dbHelper) {
+    public FileAdapter(ArrayList<FileModel> data, Context context, DBHelper dbHelper) {
         this.mDatas = data;
         this.mContext = context;
-        this.mDBhelper = dbHelper;
+        this.mDBHelper = dbHelper;
     }
 
     @NonNull
@@ -71,7 +66,7 @@ public class NormalAdapter extends RecyclerView.Adapter<NormalAdapter.VH> {
 
     @Override
     public void onBindViewHolder(@NonNull final VH holder, final int position) {
-        final ObjectModel model =mDatas.get(position);
+        final FileModel model = mDatas.get(position);
         if (file_status == NORMAL) {
             holder.fileName.setText(model.mp3Name);
             holder.fileDetails.setText(model.mp3Detail);
@@ -139,11 +134,11 @@ public class NormalAdapter extends RecyclerView.Adapter<NormalAdapter.VH> {
 
     static class VH extends RecyclerView.ViewHolder {
 
-        public final TextView fileName;
-        public final TextView fileDetails;
-        public final ImageView fileIcon;
+        final TextView fileName;
+        final TextView fileDetails;
+        final ImageView fileIcon;
 
-        public VH(@NonNull View itemView) {
+        private VH(@NonNull View itemView) {
             super(itemView);
             this.fileName = itemView.findViewById(R.id.mp3Name);
             this.fileDetails = itemView.findViewById(R.id.mp3Detail);
@@ -186,10 +181,10 @@ public class NormalAdapter extends RecyclerView.Adapter<NormalAdapter.VH> {
                     return 0;
                 }
             });
-            SQLiteDatabase db = mDBhelper.getWritableDatabase();
+            SQLiteDatabase db = mDBHelper.getWritableDatabase();
             for (Integer pos : positions) {
                 //数据库删除
-                ObjectModel ob = mDatas.get(pos);
+                FileModel ob = mDatas.get(pos);
                 db.beginTransaction();
                 try {
                     db.delete("AudioFile", "mp3_file_name = ?", new String[] {ob.getMp3Name()});
@@ -223,7 +218,7 @@ public class NormalAdapter extends RecyclerView.Adapter<NormalAdapter.VH> {
             Toast.makeText(mContext, "请选择需要重命名的文件", Toast.LENGTH_SHORT).show();
         } else {
             positions.size();
-            final ObjectModel tmpOB = mDatas.get(positions.get(0));
+            final FileModel tmpOB = mDatas.get(positions.get(0));
 
             final EditText name = new EditText(mContext);
             AlertDialog dialog = new AlertDialog.Builder(mContext).setTitle("输入文件名")
@@ -237,7 +232,7 @@ public class NormalAdapter extends RecyclerView.Adapter<NormalAdapter.VH> {
                                 Toast.makeText(mContext, "文件名不能为空", Toast.LENGTH_SHORT).show();
                             } else {
 
-                                for (ObjectModel obj : mDatas) {
+                                for (FileModel obj : mDatas) {
                                     if (obj.getMp3Name().equals(newName)) {
                                         Toast.makeText(mContext, "文件名已存在", Toast.LENGTH_SHORT).show();
                                         return;
@@ -257,7 +252,7 @@ public class NormalAdapter extends RecyclerView.Adapter<NormalAdapter.VH> {
                                 FileUtils.deleteFile(oldFilePath);
 
                                 //数据库修改
-                                SQLiteDatabase db = mDBhelper.getWritableDatabase();
+                                SQLiteDatabase db = mDBHelper.getWritableDatabase();
                                 ContentValues values = new ContentValues();
                                 values.put("mp3_file_name", newName);
                                 db.beginTransaction();
@@ -306,11 +301,11 @@ public class NormalAdapter extends RecyclerView.Adapter<NormalAdapter.VH> {
         this.mp3Play = mp3Play;
     }
 
-    public ArrayList<ObjectModel> getDatas() {
+    public ArrayList<FileModel> getDatas() {
         return mDatas;
     }
 
-    public void setDatas(ArrayList<ObjectModel> datas) {
+    public void setDatas(ArrayList<FileModel> datas) {
         this.mDatas = datas;
     }
 }

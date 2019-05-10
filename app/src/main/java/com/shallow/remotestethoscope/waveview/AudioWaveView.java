@@ -16,6 +16,7 @@ import android.view.ViewTreeObserver;
 
 import com.shallow.remotestethoscope.R;
 import com.shallow.remotestethoscope.base.BaseRecorder;
+import com.shallow.remotestethoscope.base.ConstantUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -30,6 +31,8 @@ import androidx.annotation.NonNull;
 
 public class AudioWaveView extends View {
     final protected  Object mLock = new Object();
+
+    private int drawType;
 
     private Context mContext;
 
@@ -63,13 +66,9 @@ public class AudioWaveView extends View {
 
     private boolean mDrawBase = true;
 
-    private boolean mDrawReverse = false;
-
-    private boolean mDataReverse = false;
-
     private boolean mPause = false;
 
-    private int mWaveCount = 2;
+    private int mWaveCount;
 
     private int mWaveColor = Color.parseColor("#E55D61");
 
@@ -203,26 +202,20 @@ public class AudioWaveView extends View {
                         mBackCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
                         int drawBufSize = dataList.size();
 
-                        int startPosition = mDataReverse ? mWidthSpecSize - mDrawStartOffset : mDrawStartOffset;
-                        int jOffset = mDrawReverse ? -mOffset : mOffset;
+                        int startPosition = mDrawStartOffset;
+                        int jOffset = mOffset;
 
-                        if (mDrawBase) {
-                            if (mDataReverse) {
-                                mBackCanvas.drawLine(startPosition, mBaseLine, 0, mBaseLine, mPaint);
-                            } else {
-                                mBackCanvas.drawLine(startPosition, mBaseLine, mWidthSpecSize, mBaseLine, mPaint);
-                            }
-                        }
+                        mBackCanvas.drawLine(startPosition, mBaseLine, mWidthSpecSize, mBaseLine, mPaint);
 
-                        if (mDataReverse) {
-                            for (int i = drawBufSize - 1, j = startPosition; i >= 0; i--, j += jOffset) {
-                                Short sh = dataList.get(i);
-                                drawNow(sh, j);
-                            }
-                        } else {
+                        if (drawType == ConstantUtil.DRAW_TONE) {
                             for (int i = 0, j = startPosition; i < drawBufSize; i++, j += jOffset) {
                                 Short sh = dataList.get(i);
-                                drawNow(sh, j);
+                                drawTone(sh, j);
+                            }
+                        } else if (drawType == ConstantUtil.DRAW_EMG) {
+                            for (int i = 0, j = startPosition; i < drawBufSize; i++, j += jOffset) {
+                                Short sh = dataList.get(i);
+                                drawEmg(sh, j);
                             }
                         }
 
@@ -254,10 +247,10 @@ public class AudioWaveView extends View {
      * @param list 音频数据
      */
     private void resolveToWaveData(ArrayList<Short> list) {
-        short allMax = 0;
+        int allMax = 0;
         for (int i = 0; i < list.size(); i++) {
-            Short sh = list.get(i);
-            if (sh != null && sh > allMax) {
+            Integer sh = Math.abs((int)list.get(i));
+            if (sh > allMax) {
                 allMax = sh;
             }
         }
@@ -267,7 +260,7 @@ public class AudioWaveView extends View {
         }
     }
 
-    private void drawNow(Short sh, int j) {
+    private void drawTone(Short sh, int j) {
         if (sh != null) {
             short max = (short) (mBaseLine - sh / mScale);
             short min;
@@ -278,6 +271,18 @@ public class AudioWaveView extends View {
             }
             mBackCanvas.drawLine(j, mBaseLine, j, max, mPaint);
             mBackCanvas.drawLine(j, min, j, mBaseLine, mPaint);
+        }
+    }
+
+    private void drawEmg(Short sh, int j) {
+        if (sh != null) {
+            if (sh >= 0) {
+                float max = mBaseLine - sh * 6.15f / mScale;
+                mBackCanvas.drawLine(j, mBaseLine, j, max, mPaint);
+            } else {
+                float min = Math.abs((int)sh) * 6.15f / mScale + mBaseLine;
+                mBackCanvas.drawLine(j, min, j, mBaseLine, mPaint);
+            }
         }
     }
 
@@ -311,13 +316,14 @@ public class AudioWaveView extends View {
     /**
      * 开始绘制
      */
-    public void startView() {
+    public void startView(int type) {
         if (mInnerThread != null && mInnerThread.isAlive()) {
             mIsDraw = false;
             while (mInnerThread.isAlive());
             mBackCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
             mCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         }
+        drawType = type;
         mIsDraw = true;
         mInnerThread = new DrawThread();
         mInnerThread.start();
@@ -431,21 +437,21 @@ public class AudioWaveView extends View {
         this.mDrawBase = drawBase;
     }
 
-    /**
-     * 绘制相反方向
-     *
-     */
-    public void setDrawReverse(boolean drawReverse) {
-        this.mDrawReverse = drawReverse;
-    }
-
-    /**
-     * 数据相反方向
-     *
-     */
-    public void setDataReverse(boolean dataReverse) {
-        this.mDataReverse = dataReverse;
-    }
+//    /**
+//     * 绘制相反方向
+//     *
+//     */
+//    public void setDrawReverse(boolean drawReverse) {
+//        this.mDrawReverse = drawReverse;
+//    }
+//
+//    /**
+//     * 数据相反方向
+//     *
+//     */
+//    public void setDataReverse(boolean dataReverse) {
+//        this.mDataReverse = dataReverse;
+//    }
 
     private int dip2px(Context context, float dipValue) {
         float fontScale = context.getResources().getDisplayMetrics().density;

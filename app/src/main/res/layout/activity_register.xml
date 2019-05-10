@@ -14,7 +14,7 @@
         android:gravity="center"
         android:minHeight="80dp"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        android:navigationIcon="@mipmap/ic_action_arrow_back_left_navigation_previous"
+        app:navigationIcon="@mipmap/ic_action_arrow_back_left_navigation_previous"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         tools:ignore="MissingConstraints">
 

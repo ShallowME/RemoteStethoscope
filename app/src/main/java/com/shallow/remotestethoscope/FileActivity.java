@@ -17,8 +17,8 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import com.shallow.remotestethoscope.base.DBHelper;
 import com.shallow.remotestethoscope.base.FileUtils;
-import com.shallow.remotestethoscope.recyclerview.NormalAdapter;
-import com.shallow.remotestethoscope.recyclerview.ObjectModel;
+import com.shallow.remotestethoscope.recyclerview.FileAdapter;
+import com.shallow.remotestethoscope.recyclerview.FileModel;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ import java.util.ArrayList;
 public class FileActivity extends AppCompatActivity implements View.OnClickListener {
 
     private RecyclerView mRecyclerView;
-    private NormalAdapter mNoHeaderAdapter;
+    private FileAdapter mFileAdapter;
     private DividerItemDecoration mDecoration;
     private RecyclerView.LayoutManager mLayoutManager;
 
@@ -66,11 +66,11 @@ public class FileActivity extends AppCompatActivity implements View.OnClickListe
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.addItemDecoration(mDecoration);
-        mNoHeaderAdapter = new NormalAdapter(initData(), FileActivity.this, dbHelper);
-        mRecyclerView.setAdapter(mNoHeaderAdapter);
-        mNoHeaderAdapter.setRecyclerView(mRecyclerView);
+        mFileAdapter = new FileAdapter(initData(), FileActivity.this, dbHelper);
+        mRecyclerView.setAdapter(mFileAdapter);
+        mFileAdapter.setRecyclerView(mRecyclerView);
         operateMenu = findViewById(R.id.fileOperateMenu);
-        mNoHeaderAdapter.setOperateMenu(operateMenu);
+        mFileAdapter.setOperateMenu(operateMenu);
 
     }
 
@@ -79,16 +79,16 @@ public class FileActivity extends AppCompatActivity implements View.OnClickListe
         super.onStart();
         Log.i("FileActivity", "OnStart");
         String rootPath = FileUtils.getAppPath();
-        String tmpPath = rootPath + mNoHeaderAdapter.getMp3Play() + ".mp3";
+        String tmpPath = rootPath + mFileAdapter.getMp3Play() + ".mp3";
         if (! new File(tmpPath).exists()) {
-            ArrayList<ObjectModel> datas = mNoHeaderAdapter.getDatas();
-            for (ObjectModel ob : datas) {
-                if (ob.getMp3Name().equals(mNoHeaderAdapter.getMp3Play())) {
+            ArrayList<FileModel> datas = mFileAdapter.getDatas();
+            for (FileModel ob : datas) {
+                if (ob.getMp3Name().equals(mFileAdapter.getMp3Play())) {
                     datas.remove(ob);
                 }
             }
-            mNoHeaderAdapter.setDatas(datas);
-            mNoHeaderAdapter.notifyDataSetChanged();
+            mFileAdapter.setDatas(datas);
+            mFileAdapter.notifyDataSetChanged();
         }
 
     }
@@ -98,40 +98,40 @@ public class FileActivity extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()) {
             case R.id.cancel_operate_button :
                 operateMenu.setVisibility(LinearLayout.INVISIBLE);
-                mNoHeaderAdapter.clearPositions();
-                mNoHeaderAdapter.setFile_status(NormalAdapter.NORMAL);
-                mNoHeaderAdapter.notifyDataSetChanged();
+                mFileAdapter.clearPositions();
+                mFileAdapter.setFile_status(FileAdapter.NORMAL);
+                mFileAdapter.notifyDataSetChanged();
                 break;
             case R.id.delete_file_button :
-                mNoHeaderAdapter.deleteFile();
+                mFileAdapter.deleteFile();
                 break;
 
             case R.id.rename_file_button :
-                mNoHeaderAdapter.renameFile();
+                mFileAdapter.renameFile();
                 break;
 
             case R.id.select_all_button :
-                mNoHeaderAdapter.selectAllFile();
+                mFileAdapter.selectAllFile();
                 break;
         }
     }
 
 
-    public ArrayList<ObjectModel> initData() {
+    public ArrayList<FileModel> initData() {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         SharedPreferences userSetting = getSharedPreferences("setting", 0);
         String username = userSetting.getString("username", "");
         Cursor cursor = db.rawQuery("select * from AudioFile where username is ?", new String[] {username});
-        ArrayList<ObjectModel> modelList = new ArrayList<>();
+        ArrayList<FileModel> modelList = new ArrayList<>();
         if (cursor.moveToFirst()) {
             do {
-                ObjectModel ob = new ObjectModel();
+                FileModel ob = new FileModel();
                 ob.setMp3Name(cursor.getString(cursor.getColumnIndex("mp3_file_name")));
                 String detail = cursor.getString(cursor.getColumnIndex("mp3_file_time")) +
                         "  |  " + cursor.getString(cursor.getColumnIndex("mp3_file_duration"));
                 ob.setMp3Detail(detail);
                 ob.setMp3Img(R.drawable.ic_action_play);
-                ob.setMp3Status(NormalAdapter.NOT_SELECTED);
+                ob.setMp3Status(FileAdapter.NOT_SELECTED);
                 modelList.add(ob);
             } while (cursor.moveToNext());
         }

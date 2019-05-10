@@ -5,10 +5,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".EmgDisplayActivity">
 
     <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar_main"
+        android:id="@+id/toolbar_emg"
         android:layout_width="match_parent"
         android:layout_height="80dp"
         android:background="@color/colorBase"
@@ -23,68 +23,45 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="@string/tone_display"
+            android:text="@string/emg_display"
             android:textColor="@color/colorWhite"
             android:textSize="20sp"
             android:textStyle="bold" />
-
     </androidx.appcompat.widget.Toolbar>
 
 
     <Chronometer
-        android:id="@+id/timer_tone"
+        android:id="@+id/timer_emg"
         android:layout_width="250dp"
         android:layout_height="50dp"
         android:layout_marginTop="30dp"
-        android:layout_below="@+id/toolbar_main"
+        android:layout_below="@+id/toolbar_emg"
         android:layout_centerHorizontal="true"
         android:format="00:00:00"
         android:gravity="center"
         android:textSize="30sp" />
 
     <com.shallow.remotestethoscope.waveview.AudioWaveView
-        android:id="@+id/audioWaveTone"
+        android:id="@+id/audioWaveEmg"
         android:layout_width="match_parent"
         android:layout_height="150dp"
-        android:layout_below="@+id/timer_tone"
+        android:layout_below="@+id/timer_emg"
         android:layout_marginTop="45dp"
         waveview:waveColor="@color/colorBase" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="120dp"
-        android:orientation="horizontal"
-        android:layout_alignParentBottom="true"
-        android:gravity="center">
-
-        <ImageButton
-            android:id="@+id/cancel_record_tone"
-            android:layout_width="46dp"
-            android:layout_height="46dp"
-            android:layout_marginEnd="30dp"
-            android:background="@drawable/ic_imagebutton_shape"
-            android:contentDescription="@string/cancel_record_button"
-            app:srcCompat="@mipmap/ic_action_cross" />
-
-        <ImageButton
-            android:id="@+id/on_pause_tone"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:background="@drawable/ic_imagebutton_shape"
-            android:contentDescription="@string/on_pause_button"
-            app:srcCompat="@mipmap/ic_action_play_arrow"/>
-
-        <ImageButton
-            android:id="@+id/list_save_tone"
-            android:layout_width="46dp"
-            android:layout_height="46dp"
-            android:layout_marginStart="30dp"
-            android:background="@drawable/ic_imagebutton_shape"
-            android:contentDescription="@string/list_save_button"
-            app:srcCompat="@mipmap/ic_action_bullet_list" />
 
 
-    </LinearLayout>
+    <ImageButton
+        android:id="@+id/on_pause_emg"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_below="@+id/audioWaveEmg"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="120dp"
+        android:background="@drawable/ic_imagebutton_shape"
+        android:contentDescription="@string/on_pause_button"
+        app:srcCompat="@mipmap/ic_action_play_arrow"/>
+
+
 
 </RelativeLayout>

@@ -1,14 +1,14 @@
 package com.shallow.remotestethoscope.recyclerview;
 
-public class ObjectModel {
-    public String mp3Name;
-    public String mp3Detail;
-    public int mp3Img;
-    public boolean mp3Status;
+public class FileModel {
+    String mp3Name;
+    String mp3Detail;
+    int mp3Img;
+    private boolean mp3Status;
 
-    public ObjectModel() { }
+    public FileModel() { }
 
-    public ObjectModel(String mp3Name, String mp3Detail, int mp3Img) {
+    public FileModel(String mp3Name, String mp3Detail, int mp3Img) {
         this.mp3Name = mp3Name;
         this.mp3Detail = mp3Detail;
         this.mp3Img = mp3Img;

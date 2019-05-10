@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
-        android:text="ssss"
+        android:text="@string/mp3_name"
         android:textSize="15sp"/>
     
     <TextView
@@ -20,7 +20,7 @@
         android:layout_below="@+id/mp3Name"
         android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
-        android:text="ssss  |  2222"
+        android:text="@string/date_and_duration"
         android:textSize="15sp"/>
 
     <ImageView

@@ -55,7 +55,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     SharedPreferences.Editor editor = userSetting.edit();
                     editor.putString("userName", username);
                     editor.apply();
-                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                    Intent intent = new Intent(LoginActivity.this, FunctionChooseActivity.class);
                     startActivity(intent);
                 } else {
                     Toast.makeText(this, "密码错误", Toast.LENGTH_SHORT).show();
@@ -99,7 +99,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             int uLength = username.getText().length();
             int pLength = password.getText().length();
             if (uLength > 0 && pLength >0) {
-                login_btn.setClickable(true);
+                login_btn.setEnabled(true);
                 login_btn.setBackgroundResource(R.drawable.ic_fill_button_shape);
             }
         }
