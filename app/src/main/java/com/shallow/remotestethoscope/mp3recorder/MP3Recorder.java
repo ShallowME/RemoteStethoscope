@@ -23,7 +23,7 @@ import static android.content.ContentValues.TAG;
 public class MP3Recorder extends BaseRecorder {
     //=======================AudioRecord & AudioTrack Default Setting==========================
 
-    //Use microphone as audio source
+    //Use voice_communication as audio source
     private static final int DEFAULT_AUDIO_SOURCE = MediaRecorder.AudioSource.VOICE_COMMUNICATION;
 
     //Use 44.1kHz as sampling rate

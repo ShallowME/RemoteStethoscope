@@ -1,6 +1,5 @@
 package com.shallow.remotestethoscope.audio;
 
-import android.content.Context;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
@@ -10,7 +9,6 @@ import android.media.MediaFormat;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.shallow.remotestethoscope.base.BaseRecorder;

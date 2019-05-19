@@ -245,10 +245,10 @@ public class BtManager {
             if (!BluetoothAdapter.checkBluetoothAddress(mac)) {
                 throw new IllegalArgumentException("mac address is not correct! make sure it's upper case!");
             }
-            if (mReadable = false) {
+            if (!mReadable) {
                 mReadable = true;
             }
-            if (mWritable = false) {
+            if (!mWritable) {
                 mWritable = true;
             }
             if (mOnConnectListener != null) {
@@ -395,9 +395,17 @@ public class BtManager {
                 mOnSendMessageListener.onError(new NullPointerException(DEVICE_HAS_NOT_BLUETOOTH_MODULE));
                 return;
             }
-            mMessageBeanQueue.add(message);
-            WriteRunnable writeRunnable = new WriteRunnable();
-            mExecutorService.submit(writeRunnable);
+            byte[] commandHex = DataConversion.stringToByteArray(message);
+            try{
+                mOutputStream.write(commandHex);
+                mOutputStream.flush();
+                Log.i(TAG, "Sending message :" + message);
+                mOnSendMessageListener.onSuccess("Success to send message");
+            } catch (IOException e) {
+                e.printStackTrace();
+                mOnSendMessageListener.onConnectionLost(e);
+                mCurrStatus = STATUS.FREE;
+            }
             if (needResponse) {
                 if (readRunnable == null) {
                     readRunnable = new ReadRunnable();
@@ -458,23 +466,22 @@ public class BtManager {
             while (mReadable) {
                 if(!mPause) {
                     try {
-                        int count = mInputStream.available();
-                        byte[] signals = new byte[count];
+                        byte[] signals = new byte[1024];
                         mInputStream.read(signals);
                         Log.i(TAG, DataConversion.byteArrayToString(signals));
                         for (int i = 0; i < signals.length;) {
                             if (getUnsignedByte(signals[i]) == 0x68 &&
                                     getUnsignedByte(signals[i + 1]) == 0x67 &&
-                                    getUnsignedByte(signals[i + 2]) == 0xE0 &&
+                                    getUnsignedByte(signals[i + 2]) == 0xe0 &&
                                     getUnsignedByte(signals[i + 3]) == 0x10  && !isAnalyzing) {
                                 isAnalyzing = true;
                                 i += 4;
-                            } else if (getUnsignedByte(signals[i]) == 0x00 &&
+                            } else if (getUnsignedByte(signals[i]) == 0x0f &&
                                     getUnsignedByte(signals[i + 1]) == 0xff && isAnalyzing ) {
                                 isAnalyzing = false;
                                 i += 2;
                             } else {
-//                                if (isAnalyzing) {
+                                if (isAnalyzing) {
                                     int dataReceived = DataConversion.byteToInt(signals[i], signals[i + 1]);
                                     if (dataReceived > 32767) {
                                         dataReceived = dataReceived - 65535;
@@ -487,10 +494,12 @@ public class BtManager {
                                         }
                                         mDatas.add((short) dataReceived);
                                     }
-//                                }
+                                } else {
+                                    i += 2;
+                                }
                             }
+                            mOnReceiveMessageListener.onNewLine(byteArrayToString(signals));
                         }
-                        mOnReceiveMessageListener.onNewLine(byteArrayToString(signals));
                     }catch (IOException e) {
                         e.printStackTrace();
                         mOnReceiveMessageListener.onConnectionLost(e);

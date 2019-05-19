@@ -161,7 +161,7 @@ public class EmgDisplayActivity extends AppCompatActivity{
                     btManager.sendMessage(ch1StartCommand, true);
                     audioWave.startView(ConstantUtil.DRAW_EMG);
                 }
-            }, 7000);
+            }, 5000);
         } catch (Exception e) {
             resolveUI();
             Toast.makeText(this, "蓝牙连接或数据采集异常", Toast.LENGTH_SHORT).show();

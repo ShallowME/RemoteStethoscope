@@ -14,19 +14,11 @@
         android:background="@color/colorBase"
         android:gravity="center"
         android:minHeight="80dp"
+        android:text=""
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:navigationIcon="@mipmap/ic_action_arrow_back_left_navigation_previous"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         tools:ignore="MissingConstraints">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/tone_display"
-            android:textColor="@color/colorWhite"
-            android:textSize="20sp"
-            android:textStyle="bold" />
 
     </androidx.appcompat.widget.Toolbar>
 
