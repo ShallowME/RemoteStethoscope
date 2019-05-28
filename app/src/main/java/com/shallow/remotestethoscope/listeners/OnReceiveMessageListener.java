@@ -8,4 +8,5 @@ public interface OnReceiveMessageListener extends IErrorListener, IConnectionLos
      */
     void onNewLine(String s);
 
+    void onNewData(int data);
 }

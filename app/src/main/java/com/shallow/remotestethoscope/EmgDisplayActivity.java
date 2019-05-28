@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Chronometer;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.shallow.remotestethoscope.base.ConstantUtil;
@@ -24,9 +25,11 @@ import com.shallow.remotestethoscope.listeners.OnReceiveMessageListener;
 import com.shallow.remotestethoscope.listeners.OnSendMessageListener;
 import com.shallow.remotestethoscope.waveview.AudioWaveView;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -47,15 +50,23 @@ public class EmgDisplayActivity extends AppCompatActivity{
     private AudioWaveView audioWave;
     private Chronometer chronometer;
     private ImageButton on_pause_btn;
+    private TextView aemg;
+    private TextView iemg;
+    private TextView rms;
 
     private String mDeviceAddress;
 
     private boolean op_click_flag =true;
     private long mRecordTime = 0;
 
+    private ArrayList<Integer> emgData = new ArrayList<>();
+    private int[] protoData = new int[5];
+    private int idx = 0;
+
     private OnConnectListener mOnConnectListener;
     private OnSendMessageListener mOnSendMessageListener;
     private OnReceiveMessageListener mOnReceiveMessageListener;
+
 
     private Handler mHandler = new Handler() {
 
@@ -130,10 +141,14 @@ public class EmgDisplayActivity extends AppCompatActivity{
                     chronometer.stop();
                     mRecordTime = SystemClock.elapsedRealtime();
                     on_pause_btn.setImageResource(R.mipmap.ic_action_play_arrow);
+                    calCharacteristic();
                 }
                 op_click_flag = !op_click_flag;
             }
         });
+        aemg = findViewById(R.id.aemg);
+        iemg = findViewById(R.id.iemg);
+        rms = findViewById(R.id.rms);
     }
 
     @Override
@@ -177,7 +192,7 @@ public class EmgDisplayActivity extends AppCompatActivity{
         chronometer.setText(R.string.clock);
     }
 
-    private void initBtManager(ArrayList<Short> dataList,  int size) {
+    private void initBtManager(ArrayList<Integer> dataList,  int size) {
 
         mOnConnectListener = new OnConnectListener() {
             @Override
@@ -236,6 +251,12 @@ public class EmgDisplayActivity extends AppCompatActivity{
             public void onNewLine(String s) {
                 sendMessage(2, s);
             }
+
+            @Override
+            public void onNewData(int data) {
+                emgData.add(data);
+            }
+
 
             @Override
             public void onConnectionLost(Exception e) {
@@ -306,4 +327,25 @@ public class EmgDisplayActivity extends AppCompatActivity{
         float fontScale = context.getResources().getDisplayMetrics().density;
         return (int) (dipValue * fontScale + 0.5f);
     }
+
+    private void calCharacteristic() {
+        DecimalFormat df = new DecimalFormat("#.00");
+        double absSum = 0;
+        double qualitySum = 0;
+        double squareSum = 0;
+        Iterator it = emgData.iterator();
+        while (it.hasNext()) {
+            int emg = (int)it.next();
+            absSum += Math.abs(emg) * 6.15;
+            qualitySum += Math.abs(emg) * 6.15 * 0.001;
+            squareSum += Math.pow(Math.abs(emg), 2);
+        }
+        String aemgValue = "AEMG: " + df.format(Math.sqrt(absSum / emgData.size()));
+        String iemgValue = "iEMG: " + df.format(qualitySum);
+        String rmsValue = "rms: " + df.format(Math.sqrt(squareSum / emgData.size()));
+        aemg.setText(aemgValue);
+        iemg.setText(iemgValue);
+        rms.setText(rmsValue);
+    }
+
 }

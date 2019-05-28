@@ -21,6 +21,7 @@ import com.shallow.remotestethoscope.recyclerview.DeviceModel;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Queue;
@@ -40,7 +41,7 @@ public class BtManager {
     private static volatile BtManager mBtManager;
     private ArrayList<DeviceModel> mBondedList = new ArrayList<>();
     private ArrayList<DeviceModel> mNewList = new ArrayList<>();
-    private ArrayList<Short> mDatas = new ArrayList<>();
+    private ArrayList<Integer> mDatas = new ArrayList<>();
     private ExecutorService mExecutorService = Executors.newCachedThreadPool();
     private Queue<String> mMessageBeanQueue = new LinkedBlockingQueue<>();
     private BluetoothAdapter mBluetoothAdapter;
@@ -488,11 +489,12 @@ public class BtManager {
                                     }
                                     i += 2;
                                     Log.i(TAG, String.valueOf(dataReceived));
+                                    mOnReceiveMessageListener.onNewData(dataReceived);
                                     synchronized (mDatas) {
                                         if (mDatas.size() > mMaxSize) {
                                             mDatas.remove(0);
                                         }
-                                        mDatas.add((short) dataReceived);
+                                        mDatas.add((int)(dataReceived * 6.15f));
                                     }
                                 } else {
                                     i += 2;
@@ -529,7 +531,7 @@ public class BtManager {
         mNewList.clear();
     }
 
-    public void setDatas(ArrayList<Short> datas) {
+    public void setDatas(ArrayList<Integer> datas) {
         this.mDatas = datas;
     }
 

@@ -49,6 +49,39 @@
         android:layout_marginTop="45dp"
         waveview:waveColor="@color/colorBase" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/audioWaveEmg"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/aemg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="@color/colorBase"
+            android:text="AEMG:0" />
+
+        <TextView
+            android:id="@+id/iemg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="@color/colorBase"
+            android:text="iEMG:0"
+            android:layout_marginStart="60dp"/>
+
+        <TextView
+            android:id="@+id/rms"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="@color/colorBase"
+            android:text="rms:0"
+            android:layout_marginStart="60dp"/>
+
+    </LinearLayout>
 
 
     <ImageButton

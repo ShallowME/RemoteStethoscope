@@ -62,7 +62,7 @@ public class MP3Recorder extends BaseRecorder {
     private NoiseSuppressor noiseSuppressor;
     private DataEncodeThread mEncodeThread;
     private File mRecordFile;
-    private ArrayList<Short> dataList;
+    private ArrayList<Integer> dataList;
     private Handler errorHandler;
 
     private short[] mPCMBuffer;
@@ -126,7 +126,6 @@ public class MP3Recorder extends BaseRecorder {
                             if (mPause) {
                                 continue;
                             }
-
                             short[] tmpBuf = new short[readSize];
                             System.arraycopy(mPCMBuffer, 0, tmpBuf, 0, readSize);
                             calc(tmpBuf, 0, tmpBuf.length);
@@ -189,7 +188,7 @@ public class MP3Recorder extends BaseRecorder {
                     if (dataList.size() > mMaxSize) {
                         dataList.remove(0);
                     }
-                    dataList.add(resultMax);
+                    dataList.add((int) resultMax);
                 }
             }
         }
@@ -230,7 +229,7 @@ public class MP3Recorder extends BaseRecorder {
      * @param dataList data
      * @param maxSize maximum count
      */
-    public void setDataList(ArrayList<Short> dataList, int maxSize){
+    public void setDataList(ArrayList<Integer> dataList, int maxSize){
         this.dataList = dataList;
         this.mMaxSize = maxSize;
     }

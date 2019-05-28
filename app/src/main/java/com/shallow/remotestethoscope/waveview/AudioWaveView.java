@@ -46,7 +46,7 @@ public class AudioWaveView extends View {
 
     private Canvas mBackCanvas = new Canvas();
 
-    private final ArrayList<Short> mRecDataList = new ArrayList<>();
+    private final ArrayList<Integer> mRecDataList = new ArrayList<>();
 
     private BaseRecorder mBaseRecorder;
 
@@ -76,7 +76,6 @@ public class AudioWaveView extends View {
 
     private int mDrawStartOffset = 0;
 
-//        @SuppressLint("HandlerLeak")
     Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -180,11 +179,11 @@ public class AudioWaveView extends View {
         @Override
         public void run(){
             while (mIsDraw) {
-                ArrayList<Short> dataList = new ArrayList<>();
+                ArrayList<Integer> dataList = new ArrayList<>();
                 synchronized (mRecDataList) {
                     if (mRecDataList.size() != 0) {
                         try {
-                            dataList = (ArrayList<Short>) deepClone(mRecDataList);
+                            dataList = (ArrayList<Integer>) deepClone(mRecDataList);
                         } catch (Exception e) {
                             e.printStackTrace();
                             continue;
@@ -209,12 +208,12 @@ public class AudioWaveView extends View {
 
                         if (drawType == ConstantUtil.DRAW_TONE) {
                             for (int i = 0, j = startPosition; i < drawBufSize; i++, j += jOffset) {
-                                Short sh = dataList.get(i);
+                                Integer sh = dataList.get(i);
                                 drawTone(sh, j);
                             }
                         } else if (drawType == ConstantUtil.DRAW_EMG) {
                             for (int i = 0, j = startPosition; i < drawBufSize; i++, j += jOffset) {
-                                Short sh = dataList.get(i);
+                                Integer sh = dataList.get(i);
                                 drawEmg(sh, j);
                             }
                         }
@@ -246,7 +245,7 @@ public class AudioWaveView extends View {
      *
      * @param list 音频数据
      */
-    private void resolveToWaveData(ArrayList<Short> list) {
+    private void resolveToWaveData(ArrayList<Integer> list) {
         int allMax = 0;
         for (int i = 0; i < list.size(); i++) {
             Integer sh = Math.abs((int)list.get(i));
@@ -260,27 +259,27 @@ public class AudioWaveView extends View {
         }
     }
 
-    private void drawTone(Short sh, int j) {
+    private void drawTone(Integer sh, int j) {
         if (sh != null) {
-            short max = (short) (mBaseLine - sh / mScale);
-            short min;
+            int max = (mBaseLine - sh / mScale);
+            int min;
             if (mWaveCount == 2) {
-                min = (short) (sh / mScale + mBaseLine);
+                min = sh / mScale + mBaseLine;
             } else {
-                min = (short) mBaseLine;
+                min = mBaseLine;
             }
             mBackCanvas.drawLine(j, mBaseLine, j, max, mPaint);
             mBackCanvas.drawLine(j, min, j, mBaseLine, mPaint);
         }
     }
 
-    private void drawEmg(Short sh, int j) {
+    private void drawEmg(Integer sh, int j) {
         if (sh != null) {
             if (sh >= 0) {
-                float max = mBaseLine - sh * 6.15f / mScale;
+                int max = mBaseLine - sh / mScale;
                 mBackCanvas.drawLine(j, mBaseLine, j, max, mPaint);
             } else {
-                float min = Math.abs((int)sh) * 6.15f / mScale + mBaseLine;
+                int min = Math.abs(sh) / mScale + mBaseLine;
                 mBackCanvas.drawLine(j, min, j, mBaseLine, mPaint);
             }
         }
@@ -388,7 +387,7 @@ public class AudioWaveView extends View {
      *
      * @return mRecDataList
      */
-    public ArrayList<Short> getRecList() {
+    public ArrayList<Integer> getRecList() {
         return mRecDataList;
     }
 

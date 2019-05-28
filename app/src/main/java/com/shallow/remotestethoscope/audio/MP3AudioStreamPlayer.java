@@ -42,7 +42,7 @@ public class MP3AudioStreamPlayer extends BaseRecorder {
     protected MP3AudioStreamDelegate mDelegate;
 
 
-    private ArrayList<Short> dataList;
+    private ArrayList<Integer> dataList;
 
     private int maxSize;
 
@@ -534,7 +534,7 @@ public class MP3AudioStreamPlayer extends BaseRecorder {
                     if (dataList.size() > maxSize) {
                         dataList.remove(0);
                     }
-                    dataList.add(resultMax);
+                    dataList.add((int)resultMax);
                 }
             }
         }
@@ -557,7 +557,7 @@ public class MP3AudioStreamPlayer extends BaseRecorder {
      * @param dataList 数据
      * @param maxSize  最大个数
      */
-    public void setDataList(ArrayList<Short> dataList, int maxSize) {
+    public void setDataList(ArrayList<Integer> dataList, int maxSize) {
         this.dataList = dataList;
         this.maxSize = maxSize;
     }
