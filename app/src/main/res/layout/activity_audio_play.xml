@@ -28,45 +28,36 @@
             android:textStyle="bold" />
     </androidx.appcompat.widget.Toolbar>
 
+
+    <Chronometer
+        android:id="@+id/timer_audio"
+        android:layout_width="250dp"
+        android:layout_height="50dp"
+        android:layout_below="@+id/toolbar_audio"
+        android:layout_marginTop="30dp"
+        android:format="00:00:00"
+        android:textColor="@color/colorBase"
+        android:textAlignment="center"
+        android:textSize="30sp"
+        android:layout_marginStart="0dp"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"/>
+
     <com.shallow.remotestethoscope.waveview.AudioWaveView
         android:id="@+id/audioWavePlay"
         android:layout_width="match_parent"
         android:layout_height="150dp"
-        android:layout_below="@+id/toolbar_audio"
-        android:layout_marginTop="60dp" />
+        android:layout_below="@+id/timer_audio"
+        android:layout_marginTop="45dp" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/audioWavePlay"
-        android:orientation="horizontal">
-
-        <SeekBar
-            android:id="@+id/seekBar"
-            android:layout_width="310dp"
-            android:layout_height="wrap_content"
-            android:outlineSpotShadowColor="@color/colorBase"/>
-
-
-        <Chronometer
-            android:id="@+id/timer_audio"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:format="00:00:00"
-            android:textColor="@color/colorBase"
-            android:textAlignment="center"
-            android:layout_marginStart="0dp"
-            android:gravity="center"/>
-
-    </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="horizontal"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="180dp">
+        android:layout_below="@+id/audioWavePlay"
+        android:layout_marginTop="120dp">
 
         <ImageButton
             android:id="@+id/mp3_play_pause"

@@ -18,8 +18,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import static android.content.ContentValues.TAG;
-
 public class MP3Recorder extends BaseRecorder {
     //=======================AudioRecord & AudioTrack Default Setting==========================
 
@@ -78,6 +76,11 @@ public class MP3Recorder extends BaseRecorder {
     private int mWaveSpeed = 300;
 
     private int audioSessionId = -1;
+
+    private ArrayList<Double> input = new ArrayList<>();
+    private ArrayList<Double> output = new ArrayList<>();
+    private static double[] audla = {1.0000, -2.8869, 3.2397 , -1.6565, 0.3240};
+    private static double[] audlb = {0.0013, 0.0051, 0.0076, 0.0051, 0.0013};
 
     /**
      * Default constructor. Setup recorder with default sampling rate, mono channel
@@ -175,6 +178,7 @@ public class MP3Recorder extends BaseRecorder {
             int length = readSize / mWaveSpeed;
             short resultMax = 0, resultMin = 0;
             for (short i = 0, k = 0; i < length; i++, k += mWaveSpeed) {
+                int sum = 0;
                 for (short j = k, max = 0, min = 1000; j < k + mWaveSpeed; j++) {
                     if (shorts[j] > max) {
                         max = shorts[j];
@@ -183,15 +187,36 @@ public class MP3Recorder extends BaseRecorder {
                         min = shorts[j];
                         resultMin = min;
                     }
+                    sum += Math.abs((int)shorts[j]);
                 }
                 synchronized (dataList) {
                     if (dataList.size() > mMaxSize) {
                         dataList.remove(0);
                     }
-                    dataList.add((int) resultMax);
+//                    dataList.add((int)resultMax);
+                    dataList.add((int)sum / mWaveSpeed);
                 }
             }
         }
+    }
+
+    private int filter(int val) {
+        double result = 0;
+        if (input.size() < 4) {
+            input.add((double)val);
+            output.add((double)val);
+            result = val;
+        } else {
+            result = audlb[0] * val;
+            for (int i = 1; i <= 4; i++) {
+                result = -audla[i] * output.get(4 - i) + audlb[i] * input.get(4 - i);
+            }
+            input.remove(0);
+            input.add((double)val);
+            output.remove(0);
+            output.add(result);
+        }
+        return (int)result;
     }
 
     @Override

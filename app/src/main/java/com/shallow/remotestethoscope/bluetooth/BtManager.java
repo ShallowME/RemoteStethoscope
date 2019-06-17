@@ -21,7 +21,6 @@ import com.shallow.remotestethoscope.recyclerview.DeviceModel;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Queue;
@@ -64,6 +63,11 @@ public class BtManager {
     private volatile boolean isAnalyzing = false;
     private InputStream mInputStream;
     private OutputStream mOutputStream;
+
+    private ArrayList<Double> input = new ArrayList<>();
+    private ArrayList<Double> output = new ArrayList<>();
+    private static double[] audla = {1.0000, 3.1806, 3.8612, 2.1122, 0.4383};
+    private static double[] audlb = {0.6620, 2.6481, 3.9721, 2.6481, 0.6620};
 
     private volatile STATUS mCurrStatus = STATUS.FREE;
 
@@ -494,7 +498,7 @@ public class BtManager {
                                         if (mDatas.size() > mMaxSize) {
                                             mDatas.remove(0);
                                         }
-                                        mDatas.add((int)(dataReceived * 6.15f));
+                                        mDatas.add((int)filter(dataReceived * 6.15));
                                     }
                                 } else {
                                     i += 2;
@@ -511,6 +515,25 @@ public class BtManager {
 
             }
         }
+    }
+
+    private double filter(double val) {
+        double result = 0;
+        if (input.size() < 4) {
+            input.add(val);
+            output.add(val);
+            result = val;
+        } else {
+            result = audlb[0] * val;
+            for (int i = 1; i <= 4; i++) {
+                result = -audla[i] * output.get(4 - i) + audlb[i] * input.get(4 - i);
+            }
+            input.remove(0);
+            input.add(val);
+            output.remove(0);
+            output.add(result);
+        }
+        return result;
     }
 
     /**

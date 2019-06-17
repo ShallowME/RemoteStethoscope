@@ -40,8 +40,6 @@ public class AudioPlayActivity extends AppCompatActivity implements MP3AudioStre
 
     private AudioWaveView audioWave;
 
-    private SeekBar seekBar;
-
     private Chronometer chronometer;
 
     private ImageButton mp3_on_pause_btn;
@@ -54,13 +52,9 @@ public class AudioPlayActivity extends AppCompatActivity implements MP3AudioStre
 
     MP3AudioStreamPlayer player;
 
-    Timer timer;
-
     DBHelper dbHelper;
 
     boolean playEnd;
-
-    boolean seekBarTouch;
 
 
     @Override
@@ -95,7 +89,6 @@ public class AudioPlayActivity extends AppCompatActivity implements MP3AudioStre
         });
 
         audioWave = findViewById(R.id.audioWavePlay);
-        seekBar = findViewById(R.id.seekBar);
 
         mp3_on_pause_btn = findViewById(R.id.mp3_play_pause);
         mp3_delete_btn = findViewById(R.id.mp3_delete);
@@ -114,50 +107,12 @@ public class AudioPlayActivity extends AppCompatActivity implements MP3AudioStre
         mp3_delete_btn.setEnabled(false);
         mp3_delete_btn.getBackground().setAlpha(100);
 
-        seekBar.setEnabled(false);
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                seekBarTouch = true;
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                seekBarTouch = false;
-                if (!playEnd) {
-                    player.seekTo(seekBar.getProgress());
-                }
-            }
-        });
-
-        timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                if (playEnd || player == null || !seekBar.isEnabled()) {
-                    return;
-                }
-                long position = player.getCurPosition();
-                if (position > 0 && !seekBarTouch) {
-                    seekBar.setProgress((int) position);
-                }
-            }
-        }, 200, 200);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         audioWave.stopView();
-        if (timer != null) {
-            timer.cancel();
-            timer = null;
-        }
         stop();
     }
 
@@ -205,8 +160,6 @@ public class AudioPlayActivity extends AppCompatActivity implements MP3AudioStre
                 mp3_on_pause_btn.setEnabled(true);
                 mp3_delete_btn.setEnabled(false);
                 mp3_delete_btn.getBackground().setAlpha(100);
-                seekBar.setMax((int)player.getDuration());
-                seekBar.setEnabled(true);
             }
         });
     }
@@ -222,7 +175,6 @@ public class AudioPlayActivity extends AppCompatActivity implements MP3AudioStre
                 mp3_on_pause_btn.setImageResource(R.mipmap.ic_action_play_arrow);
                 mp3_delete_btn.setEnabled(true);
                 mp3_delete_btn.getBackground().setAlpha(255);
-                seekBar.setEnabled(false);
                 chronometer.stop();
                 mRecordTime = 0;
             }
@@ -238,7 +190,6 @@ public class AudioPlayActivity extends AppCompatActivity implements MP3AudioStre
                 playEnd = false;
                 mp3_on_pause_btn.setEnabled(true);
                 mp3_delete_btn.setEnabled(true);
-                seekBar.setEnabled(false);
             }
         });
     }
@@ -251,7 +202,6 @@ public class AudioPlayActivity extends AppCompatActivity implements MP3AudioStre
             public void run() {
                 mp3_on_pause_btn.setEnabled(false);
                 mp3_delete_btn.setEnabled(false);
-                seekBar.setEnabled(false);
             }
         });
     }
@@ -266,7 +216,6 @@ public class AudioPlayActivity extends AppCompatActivity implements MP3AudioStre
                     mp3_on_pause_btn.setImageResource(R.mipmap.ic_action_pause);
                     mp3_delete_btn.setEnabled(false);
                     mp3_delete_btn.getBackground().setAlpha(100);
-                    seekBar.setEnabled(true);
                     chronometer.setBase(SystemClock.elapsedRealtime());
                     chronometer.setText("00:00:00");
                     chronometer.start();

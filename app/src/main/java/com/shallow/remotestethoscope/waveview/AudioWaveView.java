@@ -8,6 +8,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
@@ -339,9 +340,14 @@ public class AudioWaveView extends View {
         }
         if (cleanView) {
             mRecDataList.clear();
-            mBackCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-            mCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+//            mBackCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+//            mCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+//            Paint paint = new Paint();
+//            paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+//            mBackCanvas.drawPaint(paint);
+//            mCanvas.drawPaint(paint);
 
+            invalidate();
         }
     }
 

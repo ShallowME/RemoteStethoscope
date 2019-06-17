@@ -69,10 +69,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         toolbar.setNavigationOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View v) {
+                resolveStopRecord();
                 finish();
             }
         });
-        setSupportActionBar(toolbar);
         dbHelper = new DBHelper(this, "UserData.db", null, 1);
         chronometer = findViewById(R.id.timer_tone);
         chronometer.setBase(0);
